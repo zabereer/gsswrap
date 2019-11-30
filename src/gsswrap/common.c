@@ -25,10 +25,12 @@ struct gsswrap_context* gsswrap_make_context(
     return ctx;
 }
 
-void gsswrap_free_context(struct gsswrap_context* ctx)
+void* gsswrap_destroy_context(struct gsswrap_context* ctx)
 {
     free((void*)ctx->last_error);
+    void* user_data = ctx->user_data;
     free(ctx);
+    return user_data;
 }
 
 void* gsswrap_user_data(struct gsswrap_context* ctx)

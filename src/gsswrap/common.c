@@ -59,7 +59,8 @@ static void append_buffer_to_last_error(struct gsswrap_context* ctx,
     char buffer[status_string->length + 10];
     int len =
         status_string->length < INT_MAX ? status_string->length : INT_MAX;
-    snprintf(buffer, sizeof(buffer), "[ %.*s ]", len, status_string->value);
+    snprintf(buffer, sizeof(buffer), "[ %.*s ]",
+             len, (char*)status_string->value);
     append_string_to_last_string(ctx, buffer);
 }
 
@@ -75,7 +76,6 @@ static void append_codes_to_last_error(struct gsswrap_context* ctx,
 static void set_last_error(struct gsswrap_context* ctx)
 {
     OM_uint32 message_context = 0;
-    gss_buffer_desc status_string;
     // do not call gss_display_status for unknown GSS failure
     int status_type =
         ctx->major == GSS_S_FAILURE ? GSS_C_MECH_CODE : GSS_C_GSS_CODE;

@@ -1,6 +1,7 @@
 #ifndef GSSWRAP_CALLBACKS_H
 #define GSSWRAP_CALLBACKS_H
 
+#include <stdbool.h>
 #include <stddef.h>
 
 /**

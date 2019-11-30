@@ -1,5 +1,7 @@
 #include "context.h"
 
+#include <gssapi/gssapi_ext.h>
+
 #include <string.h>
 
 void gsswrap_import_name(struct gsswrap_context* ctx,
@@ -32,4 +34,24 @@ void gsswrap_acquire_cred(struct gsswrap_context* ctx,
                                   cred,
                                   NULL,  // no actual mechanism required
                                   NULL); // no actual validity time
+}
+
+void gsswrap_acquire_cred_pw(struct gsswrap_context* ctx,
+                            gss_cred_id_t* cred,
+                            const gss_name_t imported_name,
+                            const gss_cred_usage_t usage,
+                            const char* const password)
+{
+    gss_release_cred(&ctx->minor, cred);
+    gss_buffer_desc pw_buffer = {.length = strlen(password),
+                                 .value = (void*)password};
+    ctx->major = gss_acquire_cred_with_password(&ctx->minor,
+                                                imported_name,
+                                                &pw_buffer,
+                                                GSS_C_INDEFINITE,
+                                                GSS_C_NO_OID_SET,
+                                                usage,
+                                                cred,
+                                                NULL,
+                                                NULL);
 }

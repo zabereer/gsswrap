@@ -34,5 +34,10 @@ void gsswrap_acquire_cred(struct gsswrap_context*,
                           gss_cred_id_t*,
                           const gss_name_t,
                           const gss_cred_usage_t);
+void gsswrap_acquire_cred_pw(struct gsswrap_context*,
+                            gss_cred_id_t*,
+                            const gss_name_t,
+                            const gss_cred_usage_t,
+                            const char* const);
 
 #endif

@@ -17,5 +17,8 @@ bool gsswrap_set_server_name(struct gsswrap_context*,
  */
 bool gsswrap_set_client_cred(struct gsswrap_context*,
                              const char* const principal);
+bool gsswrap_set_client_cred_pw(struct gsswrap_context*,
+                                const char* const principal,
+                                const char* const password);
 
 #endif

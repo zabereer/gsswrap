@@ -5,6 +5,11 @@
 
 #include <gssapi/gssapi.h>
 
+#include <stdbool.h>
+
+/**
+ * Context used by both client and server side.
+ */
 struct gsswrap_context
 {
     gsswrap_send_token_fn send_fn;
@@ -18,5 +23,14 @@ struct gsswrap_context
     gss_name_t server_name;
     gss_cred_id_t server_cred;
 };
+
+// Internal functions used by both client and server.
+void gsswrap_import_name(struct gsswrap_context*,
+                        gss_name_t*,
+                        const char* const,
+                        const bool);
+void gsswrap_acquire_cred(struct gsswrap_context*,
+                          gss_cred_id_t*,
+                          const gss_name_t);
 
 #endif

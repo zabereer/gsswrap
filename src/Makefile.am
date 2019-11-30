@@ -9,6 +9,8 @@ include_HEADERS = \
 libgsswrap_la_SOURCES = \
     gsswrap/client.c \
     gsswrap/common.c \
+    gsswrap/context.c \
+    gsswrap/context.h \
     gsswrap/server.c
 
 libgsswrap_la_CFLAGS = -O3 -g -Wall -Wextra -Werror -pedantic

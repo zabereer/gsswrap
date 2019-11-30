@@ -19,9 +19,14 @@ struct gsswrap_context* gsswrap_make_context(
     ctx->send_fn = send_function;
     ctx->recv_fn = recv_function;
     ctx->user_data = user_data;
+
     ctx->major = GSS_S_COMPLETE;
     ctx->minor = GSS_S_COMPLETE;
     ctx->last_error = NULL;
+
+    ctx->server_name = GSS_C_NO_NAME;
+    ctx->server_cred = GSS_C_NO_CREDENTIAL;
+
     return ctx;
 }
 
@@ -29,6 +34,8 @@ void* gsswrap_destroy_context(struct gsswrap_context* ctx)
 {
     free((void*)ctx->last_error);
     void* user_data = ctx->user_data;
+    gss_release_name(&ctx->minor, &ctx->server_name);
+    gss_release_cred(&ctx->minor, &ctx->server_cred);
     free(ctx);
     return user_data;
 }

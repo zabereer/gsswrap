@@ -6,7 +6,11 @@
 /**
  * Set keytab filename. This overrides environment variable KRB5_KTNAME.
  */
-void set_keytab_file(const char* const);
+void gsswrap_set_keytab_file(const char* const);
+
+/**
+ * 
+ */
 
 
 #endif

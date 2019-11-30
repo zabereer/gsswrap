@@ -25,6 +25,7 @@ struct gsswrap_context* gsswrap_make_context(
 
     ctx->server_name = GSS_C_NO_NAME;
     ctx->server_cred = GSS_C_NO_CREDENTIAL;
+    ctx->client_cred = GSS_C_NO_CREDENTIAL;
 
     return ctx;
 }
@@ -35,6 +36,7 @@ void* gsswrap_destroy_context(struct gsswrap_context* ctx)
     void* user_data = ctx->user_data;
     gss_release_name(&ctx->minor, &ctx->server_name);
     gss_release_cred(&ctx->minor, &ctx->server_cred);
+    gss_release_cred(&ctx->minor, &ctx->client_cred);
     free(ctx);
     return user_data;
 }

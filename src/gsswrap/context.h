@@ -22,6 +22,7 @@ struct gsswrap_context
 
     gss_name_t server_name;
     gss_cred_id_t server_cred;
+    gss_cred_id_t client_cred;
 };
 
 // Internal functions used by both client and server.

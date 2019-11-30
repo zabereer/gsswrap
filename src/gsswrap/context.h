@@ -14,7 +14,6 @@ struct gsswrap_context
 {
     gsswrap_send_token_fn send_fn;
     gsswrap_recv_token_fn recv_fn;
-    void* user_data;
 
     OM_uint32 major;
     OM_uint32 minor;

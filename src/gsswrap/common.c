@@ -11,13 +11,11 @@
 
 struct gsswrap_context* gsswrap_make_context(
     gsswrap_send_token_fn send_function,
-    gsswrap_recv_token_fn recv_function,
-    void* user_data)
+    gsswrap_recv_token_fn recv_function)
 {
     struct gsswrap_context* ctx = malloc(sizeof(struct gsswrap_context));
     ctx->send_fn = send_function;
     ctx->recv_fn = recv_function;
-    ctx->user_data = user_data;
 
     ctx->major = GSS_S_COMPLETE;
     ctx->minor = GSS_S_COMPLETE;
@@ -30,20 +28,13 @@ struct gsswrap_context* gsswrap_make_context(
     return ctx;
 }
 
-void* gsswrap_destroy_context(struct gsswrap_context* ctx)
+void gsswrap_destroy_context(struct gsswrap_context* ctx)
 {
     free((void*)ctx->last_error);
-    void* user_data = ctx->user_data;
     gss_release_name(&ctx->minor, &ctx->server_name);
     gss_release_cred(&ctx->minor, &ctx->server_cred);
     gss_release_cred(&ctx->minor, &ctx->client_cred);
     free(ctx);
-    return user_data;
-}
-
-void* gsswrap_user_data(struct gsswrap_context* ctx)
-{
-    return ctx->user_data;
 }
 
 static void append_string_to_last_string(struct gsswrap_context* ctx,

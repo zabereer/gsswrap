@@ -11,7 +11,10 @@
 void gsswrap_set_keytab_file(const char* const);
 
 /**
- * 
+ * Set server credential to principal. If principal is "server" then
+ * kerberos will suffix it with the realm name (i.e. "server@REALM.COM").
+ * If host_based flag is true then "server" will become
+ * "server/host.com@REAL.COM" (host based service like ssh).
  */
 bool gsswrap_set_server_cred(struct gsswrap_context*,
                              const char* const principal,

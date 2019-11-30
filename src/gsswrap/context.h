@@ -31,6 +31,7 @@ void gsswrap_import_name(struct gsswrap_context*,
                         const bool);
 void gsswrap_acquire_cred(struct gsswrap_context*,
                           gss_cred_id_t*,
-                          const gss_name_t);
+                          const gss_name_t,
+                          const gss_cred_usage_t);
 
 #endif

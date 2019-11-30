@@ -20,14 +20,15 @@ void gsswrap_import_name(struct gsswrap_context* ctx,
 
 void gsswrap_acquire_cred(struct gsswrap_context* ctx,
                           gss_cred_id_t* cred,
-                          const gss_name_t imported_name)
+                          const gss_name_t imported_name,
+                          const gss_cred_usage_t usage)
 {
     gss_release_cred(&ctx->minor, cred);
     ctx->major = gss_acquire_cred(&ctx->minor,
                                   imported_name,
                                   GSS_C_INDEFINITE,
                                   GSS_C_NO_OID_SET,
-                                  GSS_C_ACCEPT,
+                                  usage,
                                   cred,
                                   NULL,  // no actual mechanism required
                                   NULL); // no actual validity time

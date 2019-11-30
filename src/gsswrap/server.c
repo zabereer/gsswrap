@@ -19,6 +19,9 @@ bool gsswrap_set_server_cred(struct gsswrap_context* ctx,
 {
     gsswrap_import_name(ctx, &ctx->server_name, principal, host_based);
     if (!GSS_ERROR(ctx->major))
-        gsswrap_acquire_cred(ctx, &ctx->server_cred, ctx->server_name);
+        gsswrap_acquire_cred(ctx,
+                             &ctx->server_cred,
+                             ctx->server_name,
+                             GSS_C_ACCEPT);
     return !GSS_ERROR(ctx->major);
 }

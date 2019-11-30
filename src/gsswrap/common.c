@@ -10,9 +10,15 @@
 #include <stdlib.h>
 #include <string.h>
 
-struct gsswrap_context* gsswrap_make_context()
+struct gsswrap_context* gsswrap_make_context(
+    gsswrap_send_token_fn send_function,
+    gsswrap_recv_token_fn recv_function,
+    void* user_data)
 {
     struct gsswrap_context* ctx = malloc(sizeof(struct gsswrap_context));
+    ctx->send_fn = send_function;
+    ctx->recv_fn = recv_function;
+    ctx->user_data = user_data;
     ctx->major = GSS_S_COMPLETE;
     ctx->minor = GSS_S_COMPLETE;
     ctx->last_error = NULL;
@@ -23,6 +29,11 @@ void gsswrap_free_context(struct gsswrap_context* ctx)
 {
     free((void*)ctx->last_error);
     free(ctx);
+}
+
+void* gsswrap_user_data(struct gsswrap_context* ctx)
+{
+    return ctx->user_data;
 }
 
 static void append_string_to_last_string(struct gsswrap_context* ctx,

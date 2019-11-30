@@ -1,6 +1,7 @@
 lib_LTLIBRARIES = libgsswrap.la
 
 libgsswrap_la_SOURCES = \
+    gsswrap/callbacks.h \
     gsswrap/common.c \
     gsswrap/common.h \
     gsswrap/server.c \

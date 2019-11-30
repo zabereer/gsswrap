@@ -1,10 +1,15 @@
 #ifndef GSSWRAP_CONTEXT_H
 #define GSSWRAP_CONTEXT_H
 
+#include "callbacks.h"
+
 #include <gssapi/gssapi.h>
 
 struct gsswrap_context
 {
+    gsswrap_send_token_fn send_fn;
+    gsswrap_recv_token_fn recv_fn;
+    void* user_data;
     OM_uint32 major;
     OM_uint32 minor;
     char* last_error;

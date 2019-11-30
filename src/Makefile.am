@@ -1,10 +1,14 @@
 lib_LTLIBRARIES = libgsswrap.la
 
-libgsswrap_la_SOURCES = \
+include_HEADERS = \
     gsswrap/callbacks.h \
-    gsswrap/common.c \
+    gsswrap/client.h \
     gsswrap/common.h \
-    gsswrap/server.c \
     gsswrap/server.h
+
+libgsswrap_la_SOURCES = \
+    gsswrap/client.c \
+    gsswrap/common.c \
+    gsswrap/server.c
 
 libgsswrap_la_CFLAGS = -O3 -g -Wall -Wextra -Werror -pedantic

@@ -1,6 +1,10 @@
 #ifndef GSSWRAP_COMMON_H
 #define GSSWRAP_COMMON_H
 
+/**
+ * Functions common to both client and server side.
+ */
+
 #include "callbacks.h"
 
 #include <stdbool.h>

@@ -7,8 +7,6 @@
 
 #include "callbacks.h"
 
-#include <stdbool.h>
-
 struct gsswrap_context;
 
 /**

@@ -21,4 +21,9 @@ bool gsswrap_set_client_cred_pw(struct gsswrap_context*,
                                 const char* const principal,
                                 const char* const password);
 
+/**
+ * 
+ */
+bool gsswrap_negotiate(struct gsswrap_context*,
+                       void* user_data);
 #endif

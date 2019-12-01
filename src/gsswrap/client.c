@@ -34,3 +34,31 @@ bool gsswrap_set_client_cred_pw(struct gsswrap_context* ctx,
                                 password);
     return !GSS_ERROR(ctx->major);
 }
+
+bool gsswrap_negotiate(struct gsswrap_context* ctx,
+                       void* user_data)
+{
+    gss_ctx_id_t gss_ctx = GSS_C_NO_CONTEXT;
+    gss_buffer_desc input_token = GSS_C_EMPTY_BUFFER;
+    gss_buffer_desc output_token = GSS_C_EMPTY_BUFFER;
+    OM_uint32 ret_flags;
+    const OM_uint32 req_flags =
+        GSS_C_MUTUAL_FLAG | GSS_C_CONF_FLAG | GSS_C_INTEG_FLAG |
+        GSS_C_DELEG_FLAG | GSS_C_REPLAY_FLAG | GSS_C_SEQUENCE_FLAG;
+    ctx->major = gss_init_sec_context(&ctx->minor,
+                                     ctx->client_cred,
+                                     &gss_ctx,
+                                     ctx->server_name,
+                                     GSS_C_NO_OID,
+                                     req_flags,
+                                     GSS_C_INDEFINITE,
+                                     NULL, // channel bindings
+                                     &input_token,
+                                     NULL, // actual mechanism type
+                                     &output_token,
+                                     &ret_flags,
+                                     NULL);
+
+    (void)user_data;
+    return true;
+}

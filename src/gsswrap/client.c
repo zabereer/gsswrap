@@ -102,11 +102,12 @@ bool gsswrap_initiate(const struct gsswrap_credential* gc,
             }
             input_token_read = true;
         }
-        else if (ctx->status.major & GSS_S_COMPLETE)
+        else if (ctx->status.major == GSS_S_COMPLETE)
         {
             established = true;
         }
-        else if (GSS_ERROR(ctx->status.major))
+
+        if (GSS_ERROR(ctx->status.major))
         {
             break;
         }

@@ -11,6 +11,10 @@ libgsswrap_la_SOURCES = \
     gsswrap/common.c \
     gsswrap/context.c \
     gsswrap/context.h \
-    gsswrap/server.c
+    gsswrap/credential.c \
+    gsswrap/credential.h \
+    gsswrap/server.c \
+    gsswrap/status.c \
+    gsswrap/status.h
 
 libgsswrap_la_CFLAGS = -O3 -g -Wall -Wextra -Werror -pedantic

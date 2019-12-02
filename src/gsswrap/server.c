@@ -1,9 +1,8 @@
 #include "server.h"
 
-#include "context.h"
+#include "credential.h"
 
-//#include <gssapi/gssapi.h>
-//#include <gssapi/gssapi_ext.h>
+#include <gssapi/gssapi.h>
 #include <gssapi/gssapi_krb5.h>
 
 void gsswrap_set_keytab_file(const char* const keytabfile)
@@ -11,15 +10,15 @@ void gsswrap_set_keytab_file(const char* const keytabfile)
     krb5_gss_register_acceptor_identity(keytabfile);
 }
 
-bool gsswrap_set_server_cred(struct gsswrap_context* ctx,
+bool gsswrap_set_server_cred(struct gsswrap_credential* gc,
                              const char* const principal,
                              const bool host_based)
 {
-    gsswrap_import_name(ctx, &ctx->server_name, principal, host_based);
-    if (!GSS_ERROR(ctx->major))
-        gsswrap_acquire_cred(ctx,
-                             &ctx->server_cred,
-                             ctx->server_name,
-                             GSS_C_ACCEPT);
-    return !GSS_ERROR(ctx->major);
+    import_name(gc, &gc->server_name, principal, host_based);
+    if (!GSS_ERROR(gc->status.major))
+        acquire_cred(gc,
+                     &gc->server_cred,
+                     gc->server_name,
+                     GSS_C_ACCEPT);
+    return !GSS_ERROR(gc->status.major);
 }

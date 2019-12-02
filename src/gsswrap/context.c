@@ -1,57 +1,19 @@
 #include "context.h"
 
-#include <gssapi/gssapi_ext.h>
+#include <stdlib.h>
 
-#include <string.h>
-
-void gsswrap_import_name(struct gsswrap_context* ctx,
-                        gss_name_t* name,
-                        const char* const principal,
-                        const bool host_based)
+struct gsswrap_context* make_context(gsswrap_send_token_fn send_function,
+                                     gsswrap_recv_token_fn recv_function)
 {
-    gss_release_name(&ctx->minor, name);
-    gss_buffer_desc buffer = {.length = strlen(principal),
-                              .value = (void*)principal};
-
-    ctx->major = gss_import_name(&ctx->minor,
-                                 &buffer,
-                                 host_based ? GSS_C_NT_HOSTBASED_SERVICE
-                                            : GSS_C_NT_USER_NAME,
-                                 name);
+    struct gsswrap_context* ctx = malloc(sizeof(struct gsswrap_context));
+    ctx->send_fn = send_function;
+    ctx->recv_fn = recv_function;
+    init_status(&ctx->status);
+    return ctx;
 }
 
-void gsswrap_acquire_cred(struct gsswrap_context* ctx,
-                          gss_cred_id_t* cred,
-                          const gss_name_t imported_name,
-                          const gss_cred_usage_t usage)
+void destroy_context(struct gsswrap_context* ctx)
 {
-    gss_release_cred(&ctx->minor, cred);
-    ctx->major = gss_acquire_cred(&ctx->minor,
-                                  imported_name,
-                                  GSS_C_INDEFINITE,
-                                  GSS_C_NO_OID_SET,
-                                  usage,
-                                  cred,
-                                  NULL,  // no actual mechanism required
-                                  NULL); // no actual validity time
-}
-
-void gsswrap_acquire_cred_pw(struct gsswrap_context* ctx,
-                            gss_cred_id_t* cred,
-                            const gss_name_t imported_name,
-                            const gss_cred_usage_t usage,
-                            const char* const password)
-{
-    gss_release_cred(&ctx->minor, cred);
-    gss_buffer_desc pw_buffer = {.length = strlen(password),
-                                 .value = (void*)password};
-    ctx->major = gss_acquire_cred_with_password(&ctx->minor,
-                                                imported_name,
-                                                &pw_buffer,
-                                                GSS_C_INDEFINITE,
-                                                GSS_C_NO_OID_SET,
-                                                usage,
-                                                cred,
-                                                NULL,
-                                                NULL);
+    deinit_status(&ctx->status);
+    free(ctx);
 }

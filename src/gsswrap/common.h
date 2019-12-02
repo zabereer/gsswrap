@@ -7,6 +7,7 @@
 
 #include "callbacks.h"
 
+struct gsswrap_credential;
 struct gsswrap_context;
 
 /**

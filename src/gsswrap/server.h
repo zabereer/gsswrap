@@ -6,7 +6,8 @@
 #include <stdbool.h>
 
 /**
- * Set keytab filename. This overrides environment variable KRB5_KTNAME.
+ * Set keytab filename. This overrides environment variable KRB5_KTNAME
+ * and is a global setting for Kerberos.
  */
 void gsswrap_set_keytab_file(const char* const);
 
@@ -17,7 +18,7 @@ void gsswrap_set_keytab_file(const char* const);
  * "server/host.com@REAL.COM" (host based service like ssh) where
  * "host.com" is the fully qualified host name.
  */
-bool gsswrap_set_server_cred(struct gsswrap_context*,
+bool gsswrap_set_server_cred(struct gsswrap_credential*,
                              const char* const principal,
                              const bool host_based);
 

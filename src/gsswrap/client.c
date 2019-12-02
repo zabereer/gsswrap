@@ -94,7 +94,6 @@ bool gsswrap_initiate(const struct gsswrap_credential* gc,
 
         if (ctx->status.major & GSS_S_CONTINUE_NEEDED)
         {
-            // TODO receive new input_token from peer
             if (!ctx->recv_fn(&input_token.value,
                               &input_token.length,
                               user_data))

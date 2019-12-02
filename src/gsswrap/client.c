@@ -36,9 +36,9 @@ bool gsswrap_set_client_cred_pw(struct gsswrap_credential* gc,
     return !GSS_ERROR(gc->status.major);
 }
 
-bool gsswrap_negotiate(const struct gsswrap_credential* gc,
-                       struct gsswrap_context* ctx,
-                       void* user_data)
+bool gsswrap_initiate(const struct gsswrap_credential* gc,
+                      struct gsswrap_context* ctx,
+                      void* user_data)
 {
     gss_ctx_id_t gss_ctx = GSS_C_NO_CONTEXT;
     gss_buffer_desc input_token = GSS_C_EMPTY_BUFFER;

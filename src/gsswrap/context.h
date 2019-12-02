@@ -11,13 +11,15 @@ struct gsswrap_context
 {
     gsswrap_send_token_fn send_fn;
     gsswrap_recv_token_fn recv_fn;
+    gsswrap_free_buffer_fn free_fn;
 
     struct gsswrap_status status;
 };
 
 // Internal functions used by both client and server.
 struct gsswrap_context* make_context(gsswrap_send_token_fn,
-                                     gsswrap_recv_token_fn);
+                                     gsswrap_recv_token_fn,
+                                     gsswrap_free_buffer_fn);
 void destroy_context(struct gsswrap_context*);
 
 #endif

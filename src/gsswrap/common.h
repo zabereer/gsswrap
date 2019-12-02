@@ -15,7 +15,8 @@ struct gsswrap_context;
  */
 struct gsswrap_context* gsswrap_make_context(
     gsswrap_send_token_fn send_function,
-    gsswrap_recv_token_fn recv_function);
+    gsswrap_recv_token_fn recv_function,
+    gsswrap_free_buffer_fn free_function);
 
 /**
  * Destroy the gsswrap_context freeing all associated resources.

@@ -49,6 +49,7 @@ bool gsswrap_negotiate(const struct gsswrap_credential* gc,
         GSS_C_DELEG_FLAG | GSS_C_REPLAY_FLAG | GSS_C_SEQUENCE_FLAG;
 
     OM_uint32 minor;  // temporary minor error for cleanup functions
+    bool input_token_read = false;
     bool established = false;
 
     while (!established)
@@ -69,7 +70,11 @@ bool gsswrap_negotiate(const struct gsswrap_credential* gc,
             NULL); // actual context validity time
 
         // free input_token immediately as it was just consumed
-        // TODO how to free input_token
+        if (input_token_read)
+        {
+            ctx->free_fn(input_token.value, input_token.length, user_data);
+            input_token_read = false;
+        }
 
         if ((ctx->status.major & GSS_S_CONTINUE_NEEDED) ||
             output_token.length)
@@ -90,6 +95,13 @@ bool gsswrap_negotiate(const struct gsswrap_credential* gc,
         if (ctx->status.major & GSS_S_CONTINUE_NEEDED)
         {
             // TODO receive new input_token from peer
+            if (!ctx->recv_fn(&input_token.value,
+                              &input_token.length,
+                              user_data))
+            {
+                goto cleanup;
+            }
+            input_token_read = true;
         }
         else if (ctx->status.major & GSS_S_COMPLETE)
         {
@@ -102,7 +114,7 @@ bool gsswrap_negotiate(const struct gsswrap_credential* gc,
     }
 
     // TODO verify requested flags were used by checking
-    // if ((ret_flags & req_flags) != req_flags) ...
+    // if ((ret_flags & req_flags) != req_flags) ... and then what if not?
 
 cleanup:
     gss_release_buffer(&minor, &output_token);

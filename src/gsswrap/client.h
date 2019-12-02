@@ -24,7 +24,7 @@ bool gsswrap_set_client_cred_pw(struct gsswrap_credential*,
 /**
  * 
  */
-bool gsswrap_negotiate(struct gsswrap_credential*,
+bool gsswrap_negotiate(const struct gsswrap_credential*,
                        struct gsswrap_context*,
                        void* user_data);
 #endif

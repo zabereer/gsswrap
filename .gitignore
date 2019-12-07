@@ -1,19 +1,11 @@
-build*
-.vscode
-autom4te*
-
+# ignore everthing
+*
+# but allow directories (which will be empty as everthing is ignored)
+!*/
+# include these files and everthing in src
+!.gitignore
+!configure.ac
+!Makefile.am
+!src/**
+# except this anywhere
 Makefile.in
-aclocal.m4
-ar-lib
-compile
-config.guess
-config.h.in
-config.h.in~
-config.sub
-configure
-depcomp
-install-sh
-ltmain.sh
-m4/
-missing
-src/Makefile.

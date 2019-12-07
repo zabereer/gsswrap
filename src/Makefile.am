@@ -18,3 +18,14 @@ libgsswrap_la_SOURCES = \
     gsswrap/status.h
 
 libgsswrap_la_CFLAGS = -O3 -g -Wall -Wextra -Werror -pedantic
+
+TESTS = whatever
+CLEANFILES = whatever
+check-local : whatever
+whatever_sources = \
+    test/testing.go
+
+whatever: ${whatever_sources}
+	go build -o $@ $^
+
+EXTRA_DIST = $(whatever_sources)

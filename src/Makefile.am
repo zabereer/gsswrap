@@ -18,6 +18,7 @@ libgsswrap_la_SOURCES = \
     gsswrap/status.h
 
 libgsswrap_la_CFLAGS = -O3 -g -Wall -Wextra -Werror -pedantic
+libgsswrap_la_LIBADD = -lgssapi_krb5
 
 TESTS = whatever
 CLEANFILES = whatever
@@ -25,7 +26,8 @@ check-local : whatever
 whatever_sources = \
     test/testing.go
 
+whatever: libpath = $(realpath @builddir@/.libs)
 whatever: ${whatever_sources}
-	go build -o $@ $^
+	env CGO_LDFLAGS="-L${libpath} -Wl,-rpath=${libpath}" go build -o $@ $^
 
 EXTRA_DIST = $(whatever_sources)

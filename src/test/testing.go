@@ -1,6 +1,6 @@
 package main
 
-// #cgo LDFLAGS: -lgssapi_krb5
+// #cgo LDFLAGS: -lgsswrap
 import "C"
 import (
 	"fmt"

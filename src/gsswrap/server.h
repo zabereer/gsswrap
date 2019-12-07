@@ -22,4 +22,11 @@ bool gsswrap_set_server_cred(struct gsswrap_credential*,
                              const char* const principal,
                              const bool host_based);
 
+/**
+ * 
+ */
+bool gsswrap_accept(const struct gsswrap_credential*,
+                    struct gsswrap_context*,
+                    void* user_data);
+
 #endif

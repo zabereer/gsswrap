@@ -17,8 +17,11 @@ libgsswrap_la_SOURCES = \
     gsswrap/status.c \
     gsswrap/status.h
 
-libgsswrap_la_CFLAGS = -O3 -g -Wall -Wextra -Werror -pedantic
-libgsswrap_la_LIBADD = -lgssapi_krb5
+libgsswrap_la_CFLAGS = \
+    @KRB5GSSAPI_CFLAGS@ \
+    -O3 -g -Wall -Wextra -Werror -pedantic
+libgsswrap_la_LIBADD = \
+    @KRB5GSSAPI_LIBS@
 
 TESTS = whatever
 CLEANFILES = whatever

@@ -14,6 +14,11 @@ AM_PROG_AR
 
 LT_INIT
 
+PKG_WITH_MODULES([KRB5GSSAPI],
+                 [krb5-gssapi],
+                 ,
+                 [AC_MSG_ERROR([sorry but krb5-gssapi is required])])
+
 AC_CONFIG_FILES([Makefile
                  src/Makefile])
 AC_OUTPUT

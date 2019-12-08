@@ -17,6 +17,7 @@ func main() {
 		"set to run as server, false to run as client")
 	addr := flag.String("address", "",
 		"network address (host:port)")
+	flag.Parse()
 
 	cred := C.gsswrap_make_credential()
 	defer C.gsswrap_destroy_credential(cred)
@@ -54,7 +55,7 @@ func runClient(addr *string, cred *C.struct_gsswrap_credential) {
 	log.Print("Running as client on ", *addr)
 	c, err := net.Dial("tcp", *addr)
 	if err != nil {
-		log.Fatal("Error trying to ", *addr, " - ", err)
+		log.Fatal("Error trying to connet to ", *addr, " - ", err)
 	}
 
 	con = c
@@ -62,6 +63,7 @@ func runClient(addr *string, cred *C.struct_gsswrap_credential) {
 	con.Close()
 }
 
+//export sendToPeer
 func sendToPeer(length C.size_t, data unsafe.Pointer) bool {
 	log.Print("Sending ", length, " bytes to peer")
 	err := binary.Write(con, binary.LittleEndian, length)
@@ -82,6 +84,7 @@ func sendToPeer(length C.size_t, data unsafe.Pointer) bool {
 	return true
 }
 
+//export recvFromPeer
 func recvFromPeer() (C.size_t, unsafe.Pointer) {
 	log.Print("Receiving from peer")
 	var length C.size_t

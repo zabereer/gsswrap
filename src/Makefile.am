@@ -23,4 +23,21 @@ libgsswrap_la_CFLAGS = \
 libgsswrap_la_LIBADD = \
     @KRB5GSSAPI_LIBS@
 
-SUBDIRS = test
+# TESTS = whatever
+CLEANFILES = whatever
+check-local : whatever
+whatever_sources = \
+    test/glue.c \
+    test/glue.h \
+    test/testing.go
+
+whatever: libpath = $(realpath @builddir@/.libs)
+whatever: incpath = $(realpath @top_srcdir@/src)
+whatever: real_builddir = $(realpath @builddir@)
+whatever: ${whatever_sources} libgsswrap.la
+	cd @top_srcdir@/src/test && \
+	env CGO_LDFLAGS="-L${libpath} -Wl,-rpath=${libpath}" \
+	CGO_CPPFLAGS="-I${incpath}" \
+	go build -o ${real_builddir}/$@
+
+EXTRA_DIST = $(whatever_sources)

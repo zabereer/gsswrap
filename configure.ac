@@ -20,6 +20,5 @@ PKG_WITH_MODULES([KRB5GSSAPI],
                  [AC_MSG_ERROR([sorry but krb5-gssapi is required])])
 
 AC_CONFIG_FILES([Makefile
-                 src/Makefile
-                 src/test/Makefile])
+                 src/Makefile])
 AC_OUTPUT

@@ -11,6 +11,16 @@ struct gsswrap_credential;
 struct gsswrap_context;
 
 /**
+ * 
+ */
+struct gsswrap_credential* gsswrap_make_credential();
+
+/**
+ * Destroy gsswrap_credential freeing all associated resources.
+ */
+void gsswrap_destroy_credential(struct gsswrap_credential*);
+
+/**
  * Create gsswrap_context using send_function and recv_function.
  */
 struct gsswrap_context* gsswrap_make_context(

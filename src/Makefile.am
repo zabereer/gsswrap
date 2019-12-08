@@ -31,9 +31,11 @@ whatever_sources = \
 
 whatever: libpath = $(realpath @builddir@/.libs)
 whatever: incpath = $(realpath @srcdir@)
-whatever: ${whatever_sources}
+whatever: ${whatever_sources} libgsswrap.la
 	env CGO_LDFLAGS="-L${libpath} -Wl,-rpath=${libpath}" \
 	CGO_CPPFLAGS="-I${incpath}" \
-	go build -o $@ $^
+	go build -o $@ $(filter-out libgsswrap.la,$^)
+# note using $^ to get path names to sources in srcdir, if
+# ${whatever_sources} was uses then VPATH builds would not work
 
 EXTRA_DIST = $(whatever_sources)

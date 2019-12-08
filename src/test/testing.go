@@ -1,30 +1,7 @@
 package main
 
-/*
-#cgo LDFLAGS: -lgsswrap
-#include "gsswrap/client.h"
-#include "gsswrap/server.h"
-
-bool send_to_peer_cb(const void* buffer, size_t len, void* user_data)
-{
-	return true;
-}
-
-bool recv_from_peer_cb(void** buffer, size_t* len, void* user_data)
-{
-	return true;
-}
-
-void free_buffer_cb(void* buffer, size_t len, void* user_data)
-{
-}
-
-struct gsswrap_context* make_context()
-{
-	return gsswrap_make_context(
-		send_to_peer_cb, recv_from_peer_cb, free_buffer_cb);
-}
-*/
+// #cgo LDFLAGS: -lgsswrap
+// #include "test/glue.h"
 import "C"
 import (
 	"encoding/binary"
@@ -66,7 +43,7 @@ func runServer(addr *string, cred *C.struct_gsswrap_credential) {
 			log.Fatal("Failed to accept - ", err)
 		}
 
-		ctx := C.make_context()
+		ctx := C.glue_make_context()
 		defer C.gsswrap_destroy_context(ctx)
 
 		con.Close()

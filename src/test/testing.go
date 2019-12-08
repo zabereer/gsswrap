@@ -27,9 +27,12 @@ struct gsswrap_context* make_context()
 */
 import "C"
 import (
+	"encoding/binary"
+	"encoding/hex"
 	"flag"
 	"log"
 	"net"
+	"unsafe"
 )
 
 func main() {
@@ -80,4 +83,42 @@ func runClient(addr *string, cred *C.struct_gsswrap_credential) {
 	con = c
 
 	con.Close()
+}
+
+func sendToPeer(length C.size_t, data unsafe.Pointer) bool {
+	log.Print("Sending ", length, " bytes to peer")
+	err := binary.Write(con, binary.LittleEndian, length)
+	if err != nil {
+		log.Fatal("Error sending length to peer - ", err)
+	}
+
+	d := C.GoBytes(data, C.int(length))
+	log.Print(hex.Dump(d))
+	if len(d) != int(length) {
+		log.Fatal("Incorrect length of byte buffer")
+	}
+
+	err = binary.Write(con, binary.LittleEndian, d)
+	if err != nil {
+		log.Fatal("Error sending data to peer - ", err)
+	}
+	return true
+}
+
+func recvFromPeer() (C.size_t, unsafe.Pointer) {
+	log.Print("Receiving from peer")
+	var length C.size_t
+	err := binary.Read(con, binary.LittleEndian, &length)
+	if err != nil {
+		log.Fatal("Error receiving length from peer - ", err)
+	}
+
+	data := make([]byte, length)
+	err = binary.Read(con, binary.LittleEndian, data)
+	if err != nil {
+		log.Fatal("Error receiving data from peer - ", err)
+	}
+	log.Print("Received ", length, " bytes from peer")
+	log.Print(hex.Dump(data))
+	return length, C.CBytes(data) // C.CBytes has to be C.free()'d
 }

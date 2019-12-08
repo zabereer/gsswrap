@@ -23,14 +23,17 @@ libgsswrap_la_CFLAGS = \
 libgsswrap_la_LIBADD = \
     @KRB5GSSAPI_LIBS@
 
-TESTS = whatever
+# TESTS = whatever
 CLEANFILES = whatever
 check-local : whatever
 whatever_sources = \
     test/testing.go
 
 whatever: libpath = $(realpath @builddir@/.libs)
+whatever: incpath = $(realpath @srcdir@)
 whatever: ${whatever_sources}
-	env CGO_LDFLAGS="-L${libpath} -Wl,-rpath=${libpath}" go build -o $@ $^
+	env CGO_LDFLAGS="-L${libpath} -Wl,-rpath=${libpath}" \
+	CGO_CPPFLAGS="-I${incpath}" \
+	go build -o $@ $^
 
 EXTRA_DIST = $(whatever_sources)

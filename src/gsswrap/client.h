@@ -6,7 +6,7 @@
 #include <stdbool.h>
 
 /**
- * 
+ * (Normally this does not fail for an invalid server_name.)
  */
 bool gsswrap_set_server_name(struct gsswrap_credential*,
                              const char* const server_name,

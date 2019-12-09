@@ -37,6 +37,7 @@ void gsswrap_destroy_context(struct gsswrap_context*);
  * Returns last error string or NULL if none.
  * Ownership of the string remains with gsswrap, do not free it.
  */
-const char* gsswrap_last_error(struct gsswrap_context*);
+const char* gsswrap_last_credential_error(struct gsswrap_credential*);
+const char* gsswrap_last_context_error(struct gsswrap_context*);
 
 #endif

@@ -26,7 +26,12 @@ void gsswrap_destroy_context(struct gsswrap_context* ctx)
     destroy_context(ctx);
 }
 
-const char* gsswrap_last_error(struct gsswrap_context* ctx)
+const char* gsswrap_last_credential_error(struct gsswrap_credential* gc)
+{
+    return last_error(&gc->status);
+}
+
+const char* gsswrap_last_context_error(struct gsswrap_context* ctx)
 {
     return last_error(&ctx->status);
 }

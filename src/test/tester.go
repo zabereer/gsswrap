@@ -2,6 +2,7 @@ package main
 
 // #cgo LDFLAGS: -lgsswrap
 // #include "test/glue.h"
+// #include <stdlib.h>
 import "C"
 import (
 	"encoding/binary"
@@ -9,6 +10,7 @@ import (
 	"flag"
 	"log"
 	"net"
+	"os"
 	"unsafe"
 )
 
@@ -16,23 +18,46 @@ func main() {
 	server := flag.Bool("server", false,
 		"set to run as server, false to run as client")
 	addr := flag.String("address", "",
-		"network address (host:port)")
+		"mandatory network address (host:port)")
+	serverName := flag.String("servername", "",
+		"mandatory server name")
+	hostbased := flag.Bool("hostbased", false,
+		"true for GSS_C_NT_HOSTBASED_SERVICE principal, "+
+			"false for GSS_C_NT_USERNAME principal")
 	flag.Parse()
+	if len(*addr) == 0 || len(*serverName) == 0 {
+		flag.Usage()
+		os.Exit(1)
+	}
 
 	cred := C.gsswrap_make_credential()
 	defer C.gsswrap_destroy_credential(cred)
 
+	cservername := C.CString(*serverName)
+	defer C.free(unsafe.Pointer(cservername))
+
 	if *server {
-		runServer(addr, cred)
+		runServer(addr, cred, cservername, *hostbased)
 	} else {
-		runClient(addr, cred)
+		runClient(addr, cred, cservername, *hostbased)
 	}
 }
 
 var con net.Conn
 
-func runServer(addr *string, cred *C.struct_gsswrap_credential) {
+func runServer(
+	addr *string,
+	cred *C.struct_gsswrap_credential,
+	cservername *C.char,
+	hostbased bool) {
+
 	log.Print("Running as server on ", *addr)
+
+	if !C.gsswrap_set_server_cred(cred, cservername, hostbased == true) {
+		log.Fatal("Failed to set server credential - ",
+			C.gsswrap_last_credential_error(cred))
+	}
+
 	listener, err := net.Listen("tcp", *addr)
 	if err != nil {
 		log.Fatal("Error trying to listen on ", *addr, " - ", err)
@@ -51,8 +76,19 @@ func runServer(addr *string, cred *C.struct_gsswrap_credential) {
 	}
 }
 
-func runClient(addr *string, cred *C.struct_gsswrap_credential) {
+func runClient(
+	addr *string,
+	cred *C.struct_gsswrap_credential,
+	cservername *C.char,
+	hostbased bool) {
+
 	log.Print("Running as client on ", *addr)
+
+	if !C.gsswrap_set_server_name(cred, cservername, hostbased == true) {
+		log.Fatal("Failed to set server name - ",
+			C.gsswrap_last_credential_error(cred))
+	}
+
 	c, err := net.Dial("tcp", *addr)
 	if err != nil {
 		log.Fatal("Error trying to connet to ", *addr, " - ", err)

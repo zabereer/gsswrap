@@ -23,6 +23,8 @@ libgsswrap_la_CFLAGS = \
 libgsswrap_la_LIBADD = \
     @KRB5GSSAPI_LIBS@
 
+pkgconfig_DATA = gsswrap.pc
+
 # TESTS = whatever
 CLEANFILES = whatever
 check-local : whatever

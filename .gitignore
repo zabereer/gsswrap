@@ -9,3 +9,4 @@
 !src/**
 # except this anywhere
 Makefile.in
+build*/

@@ -20,6 +20,9 @@ PKG_WITH_MODULES([KRB5GSSAPI],
                  [krb5-gssapi],
                  ,
                  [AC_MSG_ERROR([sorry but krb5-gssapi is required])])
+dnl define "Requires:" stanza value here so we do not
+dnl have to update pkg-config pc file template
+AC_SUBST([pkgconfig_requires], [krb5-gssapi])
 
 AC_CONFIG_FILES([Makefile
                  src/Makefile

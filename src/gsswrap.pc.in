@@ -6,6 +6,6 @@ includedir=@includedir@
 Name: @PACKAGE_NAME@
 Description: Wrapper for GSSAPI for Kerberos
 Version: @PACKAGE_VERSION@
-Requires: krb5-gssapi
+Requires: @pkgconfig_requires@
 Cflags: -I${includedir}
 Libs: -L${libdir} -lgsswrap

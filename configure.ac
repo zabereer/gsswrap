@@ -1,6 +1,6 @@
 AC_PREREQ([2.69])
-AC_INIT([gsswrap], [1], [nobugs@bunny.org])
-# no-portability to use make $(realpath) in Makefile.am for go
+AC_INIT([gsswrap], [1.0.0], [pretoalb@gmail.com])
+# no-portability for using make's $(realpath) in Makefile.am for go
 AM_INIT_AUTOMAKE([-Wall -Werror -Wno-portability foreign subdir-objects])
 AC_CONFIG_SRCDIR([src/gsswrap/common.h])
 AC_CONFIG_HEADERS([config.h])

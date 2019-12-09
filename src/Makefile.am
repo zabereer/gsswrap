@@ -20,6 +20,7 @@ libgsswrap_la_SOURCES = \
 libgsswrap_la_CFLAGS = \
     @KRB5GSSAPI_CFLAGS@ \
     -O3 -g -Wall -Wextra -Werror -pedantic
+libgsswrap_la_LDFLAGS = -version-info $(subst .,:,@PACKAGE_VERSION@)
 libgsswrap_la_LIBADD = \
     @KRB5GSSAPI_LIBS@
 

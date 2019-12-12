@@ -21,9 +21,9 @@ struct gsswrap_context* gsswrap_make_context(
     return make_context(send_function, recv_function, free_function);
 }
 
-void gsswrap_destroy_context(struct gsswrap_context* ctx)
+void gsswrap_destroy_context(struct gsswrap_context* gctx)
 {
-    destroy_context(ctx);
+    destroy_context(gctx);
 }
 
 const char* gsswrap_last_credential_error(struct gsswrap_credential* gc)
@@ -31,7 +31,7 @@ const char* gsswrap_last_credential_error(struct gsswrap_credential* gc)
     return last_error(&gc->status);
 }
 
-const char* gsswrap_last_context_error(struct gsswrap_context* ctx)
+const char* gsswrap_last_context_error(struct gsswrap_context* gctx)
 {
-    return last_error(&ctx->status);
+    return last_error(&gctx->status);
 }

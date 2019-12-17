@@ -11,20 +11,20 @@ void gsswrap_set_keytab_file(const char* const keytabfile)
     krb5_gss_register_acceptor_identity(keytabfile);
 }
 
-bool gsswrap_set_server_cred(struct gsswrap_credential* gc,
+bool gsswrap_set_server_cred(struct gsswrap_credential* gcred,
                              const char* const principal,
                              const bool host_based)
 {
-    import_name(gc, &gc->server_name, principal, host_based);
-    if (!GSS_ERROR(gc->status.major))
-        acquire_cred(gc,
-                     &gc->server_cred,
-                     gc->server_name,
+    import_name(gcred, &gcred->server_name, principal, host_based);
+    if (!GSS_ERROR(gcred->status.major))
+        acquire_cred(gcred,
+                     &gcred->server_cred,
+                     gcred->server_name,
                      GSS_C_ACCEPT);
-    return !GSS_ERROR(gc->status.major);
+    return !GSS_ERROR(gcred->status.major);
 }
 
-bool gsswrap_accept(const struct gsswrap_credential* gc,
+bool gsswrap_accept(const struct gsswrap_credential* gcred,
                     struct gsswrap_context* gctx,
                     void* user_data)
 {
@@ -62,7 +62,7 @@ bool gsswrap_accept(const struct gsswrap_credential* gc,
         gctx->status.major = gss_accept_sec_context(
             &gctx->status.minor,
             &gss_ctx,
-            gc->server_cred,
+            gcred->server_cred,
             &input_token,
             NULL,  // channel bindings
             &gctx->client_name,

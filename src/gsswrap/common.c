@@ -8,9 +8,9 @@ struct gsswrap_credential* gsswrap_make_credential()
     return make_credential();
 }
 
-void gsswrap_destroy_credential(struct gsswrap_credential* gc)
+void gsswrap_destroy_credential(struct gsswrap_credential* gcred)
 {
-    destroy_credential(gc);
+    destroy_credential(gcred);
 }
 
 struct gsswrap_context* gsswrap_make_context(
@@ -26,9 +26,9 @@ void gsswrap_destroy_context(struct gsswrap_context* gctx)
     destroy_context(gctx);
 }
 
-const char* gsswrap_last_credential_error(struct gsswrap_credential* gc)
+const char* gsswrap_last_credential_error(struct gsswrap_credential* gcred)
 {
-    return last_error(&gc->status);
+    return last_error(&gcred->status);
 }
 
 const char* gsswrap_last_context_error(struct gsswrap_context* gctx)

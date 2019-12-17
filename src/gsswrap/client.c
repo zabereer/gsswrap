@@ -3,40 +3,40 @@
 #include "context.h"
 #include "credential.h"
 
-bool gsswrap_set_server_name(struct gsswrap_credential* gc,
+bool gsswrap_set_server_name(struct gsswrap_credential* gcred,
                              const char* const principal,
                              const bool host_based)
 {
-    import_name(gc, &gc->server_name, principal, host_based);
-    return !GSS_ERROR(gc->status.major);
+    import_name(gcred, &gcred->server_name, principal, host_based);
+    return !GSS_ERROR(gcred->status.major);
 }
 
-bool gsswrap_set_client_cred(struct gsswrap_credential* gc,
+bool gsswrap_set_client_cred(struct gsswrap_credential* gcred,
                              const char* const principal)
 {
     gss_name_t client = GSS_C_NO_NAME;
-    import_name(gc, &client, principal, false);
-    if (!GSS_ERROR(gc->status.major))
-        acquire_cred(gc, &gc->client_cred, client, GSS_C_INITIATE);
-    return !GSS_ERROR(gc->status.major);
+    import_name(gcred, &client, principal, false);
+    if (!GSS_ERROR(gcred->status.major))
+        acquire_cred(gcred, &gcred->client_cred, client, GSS_C_INITIATE);
+    return !GSS_ERROR(gcred->status.major);
 }
 
-bool gsswrap_set_client_cred_pw(struct gsswrap_credential* gc,
+bool gsswrap_set_client_cred_pw(struct gsswrap_credential* gcred,
                                 const char* const principal,
                                 const char* const password)
 {
     gss_name_t client = GSS_C_NO_NAME;
-    import_name(gc, &client, principal, false);
-    if (!GSS_ERROR(gc->status.major))
-        acquire_cred_pw(gc,
-                        &gc->client_cred,
+    import_name(gcred, &client, principal, false);
+    if (!GSS_ERROR(gcred->status.major))
+        acquire_cred_pw(gcred,
+                        &gcred->client_cred,
                         client,
                         GSS_C_INITIATE,
                         password);
-    return !GSS_ERROR(gc->status.major);
+    return !GSS_ERROR(gcred->status.major);
 }
 
-bool gsswrap_initiate(const struct gsswrap_credential* gc,
+bool gsswrap_initiate(const struct gsswrap_credential* gcred,
                       struct gsswrap_context* gctx,
                       void* user_data)
 {
@@ -56,9 +56,9 @@ bool gsswrap_initiate(const struct gsswrap_credential* gc,
     {
         gctx->status.major = gss_init_sec_context(
             &gctx->status.minor,
-            gc->client_cred,
+            gcred->client_cred,
             &gss_ctx,
-            gc->server_name,
+            gcred->server_name,
             GSS_C_NO_OID,
             req_flags,
             GSS_C_INDEFINITE, // maximum permitted lifetime

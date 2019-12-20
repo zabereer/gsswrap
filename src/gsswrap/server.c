@@ -6,6 +6,8 @@
 #include <gssapi/gssapi.h>
 #include <gssapi/gssapi_krb5.h>
 
+#include <string.h>
+
 void gsswrap_set_keytab_file(const char* const keytabfile)
 {
     krb5_gss_register_acceptor_identity(keytabfile);
@@ -28,6 +30,7 @@ bool gsswrap_accept(const struct gsswrap_credential* gcred,
                     struct gsswrap_context* gctx,
                     void* user_data)
 {
+    reset_context(gctx);
     gss_ctx_id_t gss_ctx = GSS_C_NO_CONTEXT;
     gss_buffer_desc input_token = GSS_C_EMPTY_BUFFER;
     gss_buffer_desc output_token = GSS_C_EMPTY_BUFFER;
@@ -108,4 +111,19 @@ bool gsswrap_accept(const struct gsswrap_credential* gcred,
     // TODO maybe keep context somewhere for encrypted exchange or delegation?
     gss_delete_sec_context(&gctx->status.minor, &gss_ctx, GSS_C_NO_BUFFER);
     return established;
+}
+
+const char* gsswrap_client_principal(struct gsswrap_context* gctx)
+{
+    if (!gctx->client_display_name)
+    {
+        gss_buffer_desc buffer;
+        gctx->status.major = gss_display_name(&gctx->status.minor,
+                                              gctx->client_name,
+                                              &buffer,
+                                              NULL);
+        if (!GSS_ERROR(gctx->status.major))
+            gctx->client_display_name = strndup(buffer.value, buffer.length);
+    }
+    return gctx->client_display_name;
 }

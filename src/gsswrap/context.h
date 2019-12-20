@@ -17,6 +17,7 @@ struct gsswrap_context
 
     // populated by server acceptor
     gss_name_t client_name;
+    const char* client_display_name;
 
     struct gsswrap_status status;
 };
@@ -25,6 +26,7 @@ struct gsswrap_context
 struct gsswrap_context* make_context(gsswrap_send_token_fn,
                                      gsswrap_recv_token_fn,
                                      gsswrap_free_buffer_fn);
+void reset_context(struct gsswrap_context*);
 void destroy_context(struct gsswrap_context*);
 
 #endif

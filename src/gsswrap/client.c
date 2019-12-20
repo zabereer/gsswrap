@@ -14,10 +14,12 @@ bool gsswrap_set_server_name(struct gsswrap_credential* gcred,
 bool gsswrap_set_client_cred(struct gsswrap_credential* gcred,
                              const char* const principal)
 {
-    gss_name_t client = GSS_C_NO_NAME;
-    import_name(gcred, &client, principal, false);
+    import_name(gcred, &gcred->client_name, principal, false);
     if (!GSS_ERROR(gcred->status.major))
-        acquire_cred(gcred, &gcred->client_cred, client, GSS_C_INITIATE);
+        acquire_cred(gcred,
+                     &gcred->client_cred,
+                     gcred->client_name,
+                     GSS_C_INITIATE);
     return !GSS_ERROR(gcred->status.major);
 }
 
@@ -25,12 +27,11 @@ bool gsswrap_set_client_cred_pw(struct gsswrap_credential* gcred,
                                 const char* const principal,
                                 const char* const password)
 {
-    gss_name_t client = GSS_C_NO_NAME;
-    import_name(gcred, &client, principal, false);
+    import_name(gcred, &gcred->client_name, principal, false);
     if (!GSS_ERROR(gcred->status.major))
         acquire_cred_pw(gcred,
                         &gcred->client_cred,
-                        client,
+                        gcred->client_name,
                         GSS_C_INITIATE,
                         password);
     return !GSS_ERROR(gcred->status.major);
@@ -40,6 +41,7 @@ bool gsswrap_initiate(const struct gsswrap_credential* gcred,
                       struct gsswrap_context* gctx,
                       void* user_data)
 {
+    reset_context(gctx);
     gss_ctx_id_t gss_ctx = GSS_C_NO_CONTEXT;
     gss_buffer_desc input_token = GSS_C_EMPTY_BUFFER;
     gss_buffer_desc output_token = GSS_C_EMPTY_BUFFER;

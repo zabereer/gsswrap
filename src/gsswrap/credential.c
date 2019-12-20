@@ -11,6 +11,7 @@ struct gsswrap_credential* make_credential()
         malloc(sizeof(struct gsswrap_credential));
     gcred->server_name = GSS_C_NO_NAME;
     gcred->server_cred = GSS_C_NO_CREDENTIAL;
+    gcred->client_name = GSS_C_NO_NAME;
     gcred->client_cred = GSS_C_NO_CREDENTIAL;
     init_status(&gcred->status);
     return gcred;
@@ -20,6 +21,7 @@ void destroy_credential(struct gsswrap_credential* gcred)
 {
     gss_release_name(&gcred->status.minor, &gcred->server_name);
     gss_release_cred(&gcred->status.minor, &gcred->server_cred);
+    gss_release_name(&gcred->status.minor, &gcred->client_name);
     gss_release_cred(&gcred->status.minor, &gcred->client_cred);
     deinit_status(&gcred->status);
     free(gcred);

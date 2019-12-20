@@ -93,7 +93,8 @@ func runServer(
 		defer C.free(unsafe.Pointer(cuserdata))
 
 		if C.gsswrap_accept(cred, ctx, unsafe.Pointer(cuserdata)) {
-			log.Print("success")
+			log.Print("success ->",
+				C.GoString(C.gsswrap_client_principal(ctx)), "<-")
 		} else {
 			log.Print("failure ", C.GoString(C.gsswrap_last_context_error(ctx)))
 		}

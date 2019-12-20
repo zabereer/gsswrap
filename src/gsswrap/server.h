@@ -29,4 +29,9 @@ bool gsswrap_accept(const struct gsswrap_credential*,
                     struct gsswrap_context*,
                     void* user_data);
 
+/**
+ * 
+ */
+const char* gsswrap_client_principal(struct gsswrap_context*);
+
 #endif

@@ -14,6 +14,8 @@ struct gsswrap_credential
 {
     gss_name_t server_name;
     gss_cred_id_t server_cred;
+
+    gss_name_t client_name;
     gss_cred_id_t client_cred;
 
     struct gsswrap_status status;

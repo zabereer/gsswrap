@@ -8,6 +8,7 @@ import (
 	"encoding/binary"
 	"encoding/hex"
 	"flag"
+	"fmt"
 	"log"
 	"net"
 	"os"
@@ -44,6 +45,7 @@ func main() {
 }
 
 var con net.Conn
+var userdata string
 
 func runServer(
 	addr *string,
@@ -63,16 +65,26 @@ func runServer(
 		log.Fatal("Error trying to listen on ", *addr, " - ", err)
 	}
 
+	connectionNumber := 0
+
 	for {
 		con, err = listener.Accept()
 		if err != nil {
 			log.Fatal("Failed to accept - ", err)
 		}
 
+		defer con.Close()
 		ctx := C.glue_make_context()
 		defer C.gsswrap_destroy_context(ctx)
+		userdata = fmt.Sprintf("server connection %d", connectionNumber)
+		cuserdata := C.CString(userdata)
+		defer C.free(unsafe.Pointer(cuserdata))
 
-		con.Close()
+		if C.gsswrap_accept(cred, ctx, unsafe.Pointer(cuserdata)) {
+			log.Print("success")
+		} else {
+			log.Print("failure ", C.gsswrap_last_context_error(ctx))
+		}
 	}
 }
 
@@ -137,4 +149,11 @@ func recvFromPeer() (C.size_t, unsafe.Pointer) {
 	log.Print("Received ", length, " bytes from peer")
 	log.Print(hex.Dump(data))
 	return length, C.CBytes(data) // C.CBytes has to be C.free()'d
+}
+
+//export verifyUserData
+func verifyUserData(cuserdata *C.char) {
+	if cuserdata == nil || userdata != C.GoString(cuserdata) {
+		log.Fatal("mismatched userdata, expecting ", userdata)
+	}
 }

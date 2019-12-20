@@ -91,7 +91,7 @@ func runClient(
 
 	c, err := net.Dial("tcp", *addr)
 	if err != nil {
-		log.Fatal("Error trying to connet to ", *addr, " - ", err)
+		log.Fatal("Error trying to connect to ", *addr, " - ", err)
 	}
 
 	con = c

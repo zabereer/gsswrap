@@ -107,8 +107,18 @@ func runClient(
 	}
 
 	con = c
+	defer con.Close()
+	ctx := C.glue_make_context()
+	defer C.gsswrap_destroy_context(ctx)
+	userdata = "client connection"
+	cuserdata := C.CString(userdata)
+	defer C.free(unsafe.Pointer(cuserdata))
 
-	con.Close()
+	if C.gsswrap_initiate(cred, ctx, unsafe.Pointer(cuserdata)) {
+		log.Print("succes")
+	} else {
+		log.Print("failure ", C.gsswrap_last_context_error(ctx))
+	}
 }
 
 //export sendToPeer

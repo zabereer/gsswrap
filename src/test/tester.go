@@ -25,10 +25,22 @@ func main() {
 	hostbased := flag.Bool("hostbased", false,
 		"true for GSS_C_NT_HOSTBASED_SERVICE principal, "+
 			"false for GSS_C_NT_USERNAME principal")
+	clientName := flag.String("clientname", "",
+		"client name (not applicable for server)")
+	clientPass := flag.String("clientpass", "",
+		"client password (optional, and not applicable for server)")
 	flag.Parse()
 	if len(*addr) == 0 || len(*serverName) == 0 {
 		flag.Usage()
 		os.Exit(1)
+	}
+
+	if *server && (*clientName != "" || *clientPass != "") {
+		log.Fatal("clientname and clientpass not applicable for server")
+	}
+
+	if !*server && (*clientName == "") {
+		log.Fatal("clientname (and optional clientpass) required for client")
 	}
 
 	cred := C.gsswrap_make_credential()
@@ -40,7 +52,7 @@ func main() {
 	if *server {
 		runServer(addr, cred, cservername, *hostbased)
 	} else {
-		runClient(addr, cred, cservername, *hostbased)
+		runClient(addr, cred, cservername, *hostbased, clientName, clientPass)
 	}
 }
 
@@ -83,7 +95,7 @@ func runServer(
 		if C.gsswrap_accept(cred, ctx, unsafe.Pointer(cuserdata)) {
 			log.Print("success")
 		} else {
-			log.Print("failure ", C.gsswrap_last_context_error(ctx))
+			log.Print("failure ", C.GoString(C.gsswrap_last_context_error(ctx)))
 		}
 	}
 }
@@ -92,13 +104,19 @@ func runClient(
 	addr *string,
 	cred *C.struct_gsswrap_credential,
 	cservername *C.char,
-	hostbased bool) {
+	hostbased bool,
+	clientName *string,
+	clientPass *string) {
 
 	log.Print("Running as client on ", *addr)
 
 	if !C.gsswrap_set_server_name(cred, cservername, hostbased == true) {
 		log.Fatal("Failed to set server name - ",
 			C.gsswrap_last_credential_error(cred))
+	}
+
+	if !setClientCred(cred, clientName, clientPass) {
+		log.Fatal("Failed to set client credential")
 	}
 
 	c, err := net.Dial("tcp", *addr)
@@ -117,8 +135,34 @@ func runClient(
 	if C.gsswrap_initiate(cred, ctx, unsafe.Pointer(cuserdata)) {
 		log.Print("succes")
 	} else {
-		log.Print("failure ", C.gsswrap_last_context_error(ctx))
+		log.Print("failure ", C.GoString(C.gsswrap_last_context_error(ctx)))
 	}
+}
+
+func setClientCred(
+	cred *C.struct_gsswrap_credential,
+	clientName *string,
+	clientPass *string) bool {
+	if *clientName == "" {
+		log.Print("client name is not set")
+		return false
+	}
+	cclientname := C.CString(*clientName)
+	defer C.free(unsafe.Pointer(cclientname))
+	if *clientPass == "" {
+		if !C.gsswrap_set_client_cred(cred, cclientname) {
+			log.Print(C.GoString(C.gsswrap_last_credential_error(cred)))
+			return false
+		}
+	} else {
+		cclientpass := C.CString(*clientPass)
+		defer C.free(unsafe.Pointer(cclientpass))
+		if !C.gsswrap_set_client_cred_pw(cred, cclientname, cclientpass) {
+			log.Print(C.GoString(C.gsswrap_last_credential_error(cred)))
+			return false
+		}
+	}
+	return true
 }
 
 //export sendToPeer

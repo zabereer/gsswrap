@@ -36,11 +36,7 @@ func main() {
 	}
 
 	if *server && (*clientName != "" || *clientPass != "") {
-		log.Fatal("clientname and clientpass not applicable for server")
-	}
-
-	if !*server && (*clientName == "") {
-		log.Fatal("clientname (and optional clientpass) required for client")
+		log.Fatal("clientname and clientpass are not applicable for server")
 	}
 
 	cred := C.gsswrap_make_credential()
@@ -145,8 +141,8 @@ func setClientCred(
 	clientName *string,
 	clientPass *string) bool {
 	if *clientName == "" {
-		log.Print("client name is not set")
-		return false
+		C.gsswrap_set_client_cred_default(cred)
+		return true
 	}
 	cclientname := C.CString(*clientName)
 	defer C.free(unsafe.Pointer(cclientname))

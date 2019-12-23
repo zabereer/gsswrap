@@ -19,10 +19,10 @@ struct gsswrap_credential* make_credential()
 
 void destroy_credential(struct gsswrap_credential* gcred)
 {
-    gss_release_name(&gcred->status.minor, &gcred->server_name);
-    gss_release_cred(&gcred->status.minor, &gcred->server_cred);
-    gss_release_name(&gcred->status.minor, &gcred->client_name);
-    gss_release_cred(&gcred->status.minor, &gcred->client_cred);
+    release_name(gcred, &gcred->server_name);
+    release_cred(gcred, &gcred->server_cred);
+    release_name(gcred, &gcred->client_name);
+    release_cred(gcred, &gcred->client_cred);
     deinit_status(&gcred->status);
     free(gcred);
 }
@@ -32,7 +32,7 @@ void import_name(struct gsswrap_credential* gcred,
                  const char* const principal,
                  const bool host_based)
 {
-    gss_release_name(&gcred->status.minor, name);
+    release_name(gcred, name);
     gss_buffer_desc buffer = {.length = strlen(principal),
                               .value = (void*)principal};
 
@@ -43,12 +43,19 @@ void import_name(struct gsswrap_credential* gcred,
                                        name);
 }
 
+void release_name(struct gsswrap_credential* gcred,
+                  gss_name_t* name)
+{
+    gss_release_name(&gcred->status.minor, name);
+    *name = GSS_C_NO_NAME;
+}
+
 void acquire_cred(struct gsswrap_credential* gcred,
                   gss_cred_id_t* cred,
                   const gss_name_t imported_name,
                   const gss_cred_usage_t usage)
 {
-    gss_release_cred(&gcred->status.minor, cred);
+    release_cred(gcred, cred);
     gcred->status.major = gss_acquire_cred(&gcred->status.minor,
                                         imported_name,
                                         GSS_C_INDEFINITE,
@@ -65,7 +72,7 @@ void acquire_cred_pw(struct gsswrap_credential* gcred,
                      const gss_cred_usage_t usage,
                      const char* const password)
 {
-    gss_release_cred(&gcred->status.minor, cred);
+    release_cred(gcred, cred);
     gss_buffer_desc pw_buffer = {.length = strlen(password),
                                  .value = (void*)password};
     gcred->status.major = gss_acquire_cred_with_password(&gcred->status.minor,
@@ -77,4 +84,11 @@ void acquire_cred_pw(struct gsswrap_credential* gcred,
                                                       cred,
                                                       NULL,
                                                       NULL);
+}
+
+void release_cred(struct gsswrap_credential* gcred,
+                  gss_cred_id_t* cred)
+{
+    gss_release_cred(&gcred->status.minor, cred);
+    *cred = GSS_C_NO_CREDENTIAL;
 }

@@ -28,6 +28,8 @@ void import_name(struct gsswrap_credential*,
                  gss_name_t*,
                  const char* const,
                  const bool);
+void release_name(struct gsswrap_credential*,
+                  gss_name_t*);
 void acquire_cred(struct gsswrap_credential*,
                   gss_cred_id_t*,
                   const gss_name_t,
@@ -37,5 +39,6 @@ void acquire_cred_pw(struct gsswrap_credential*,
                      const gss_name_t,
                      const gss_cred_usage_t,
                      const char* const);
-
+void release_cred(struct gsswrap_credential*,
+                  gss_cred_id_t*);
 #endif

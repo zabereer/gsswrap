@@ -11,6 +11,12 @@ bool gsswrap_set_server_name(struct gsswrap_credential* gcred,
     return !GSS_ERROR(gcred->status.major);
 }
 
+void gsswrap_set_client_cred_default(struct gsswrap_credential* gcred)
+{
+    release_name(gcred, &gcred->client_name);
+    release_cred(gcred, &gcred->client_cred);
+}
+
 bool gsswrap_set_client_cred(struct gsswrap_credential* gcred,
                              const char* const principal)
 {

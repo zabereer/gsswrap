@@ -97,7 +97,8 @@ func runServer(
 			log.Print("success ->",
 				C.GoString(C.gsswrap_client_principal(ctx)), "<-")
 		} else {
-			log.Print("failure ", C.GoString(C.gsswrap_last_context_error(ctx)))
+			log.Print("gsswrap_accept failure ",
+				C.GoString(C.gsswrap_last_context_error(ctx)))
 		}
 	}
 }
@@ -136,7 +137,8 @@ func runClient(
 	if C.gsswrap_initiate(cred, ctx, unsafe.Pointer(cuserdata)) {
 		log.Print("succes")
 	} else {
-		log.Print("failure ", C.GoString(C.gsswrap_last_context_error(ctx)))
+		log.Print("gsswrap_initiate failure ",
+			C.GoString(C.gsswrap_last_context_error(ctx)))
 	}
 }
 

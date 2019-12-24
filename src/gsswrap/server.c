@@ -34,7 +34,6 @@ bool gsswrap_accept(const struct gsswrap_credential* gcred,
     gss_ctx_id_t gss_ctx = GSS_C_NO_CONTEXT;
     gss_buffer_desc input_token = GSS_C_EMPTY_BUFFER;
     gss_buffer_desc output_token = GSS_C_EMPTY_BUFFER;
-    OM_uint32 ret_flags;
     OM_uint32 minor;  // temporary minor error for cleanup functions
     bool input_token_read = false;
     bool established = false;
@@ -71,7 +70,7 @@ bool gsswrap_accept(const struct gsswrap_credential* gcred,
             &gctx->client_name,
             NULL,  // actual mechanism type
             &output_token,
-            &ret_flags,
+            &gctx->ret_flags,
             NULL,  // actual context validity time
             NULL); // delegated credentials - TODO handle this
 
@@ -103,10 +102,6 @@ bool gsswrap_accept(const struct gsswrap_credential* gcred,
         }
     }
 
-    // TODO verify ret_flags are acceptable (integrity??)
-    // if (!(ret_flags & GSS_C_INTEG_FLAG)) ... and then what if not?
-
-// cleanup:
     gss_release_buffer(&minor, &output_token);
     // TODO maybe keep context somewhere for encrypted exchange or delegation?
     gss_delete_sec_context(&gctx->status.minor, &gss_ctx, GSS_C_NO_BUFFER);

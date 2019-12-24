@@ -96,6 +96,7 @@ func runServer(
 		if C.gsswrap_accept(cred, ctx, unsafe.Pointer(cuserdata)) {
 			log.Print("success ->",
 				C.GoString(C.gsswrap_client_principal(ctx)), "<-")
+			logFlags(ctx)
 		} else {
 			log.Print("gsswrap_accept failure ",
 				C.GoString(C.gsswrap_last_context_error(ctx)))
@@ -122,7 +123,6 @@ func runClient(
 	}
 
 	defer func() {
-		log.Print("deferred closing connection")
 		if con != nil {
 			(*con).Close()
 		}
@@ -136,6 +136,7 @@ func runClient(
 
 	if C.gsswrap_initiate(cred, ctx, unsafe.Pointer(cuserdata)) {
 		log.Print("succes")
+		logFlags(ctx)
 	} else {
 		log.Print("gsswrap_initiate failure ",
 			C.GoString(C.gsswrap_last_context_error(ctx)))
@@ -166,6 +167,21 @@ func setClientCred(
 		}
 	}
 	return true
+}
+
+func logFlags(ctx *C.struct_gsswrap_context) {
+	log.Print("confidentiality available: ",
+		C.gsswrap_confidentiality_available(ctx) == true)
+	log.Print("    credential delegation: ",
+		C.gsswrap_delegated(ctx) == true)
+	log.Print("      integrity available: ",
+		C.gsswrap_integrity_available(ctx) == true)
+	log.Print("    mutual authentication: ",
+		C.gsswrap_mutual_auth(ctx) == true)
+	log.Print("out of sequence detection: ",
+		C.gsswrap_out_of_sequence_detection(ctx) == true)
+	log.Print("         replay detection: ",
+		C.gsswrap_replay_detection(ctx) == true)
 }
 
 func setupConnection() bool {

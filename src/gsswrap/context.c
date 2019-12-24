@@ -13,6 +13,8 @@ struct gsswrap_context* make_context(gsswrap_send_token_fn send_function,
     gctx->client_name = GSS_C_NO_NAME;
     gctx->client_display_name = NULL;
     init_status(&gctx->status);
+    gctx->req_flags = 0;
+    gctx->ret_flags = 0;
     return gctx;
 }
 

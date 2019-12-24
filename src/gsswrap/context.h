@@ -20,6 +20,9 @@ struct gsswrap_context
     const char* client_display_name;
 
     struct gsswrap_status status;
+
+    OM_uint32 req_flags;
+    OM_uint32 ret_flags;
 };
 
 // Internal functions used by both client and server.

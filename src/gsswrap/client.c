@@ -51,10 +51,8 @@ bool gsswrap_initiate(const struct gsswrap_credential* gcred,
     gss_ctx_id_t gss_ctx = GSS_C_NO_CONTEXT;
     gss_buffer_desc input_token = GSS_C_EMPTY_BUFFER;
     gss_buffer_desc output_token = GSS_C_EMPTY_BUFFER;
-    OM_uint32 ret_flags;
-    const OM_uint32 req_flags =
-        GSS_C_MUTUAL_FLAG | GSS_C_CONF_FLAG | GSS_C_INTEG_FLAG |
-        GSS_C_DELEG_FLAG | GSS_C_REPLAY_FLAG | GSS_C_SEQUENCE_FLAG;
+    if (!gctx->req_flags)
+        gsswrap_set_all_flags(gctx);
 
     OM_uint32 minor;  // temporary minor error for cleanup functions
     bool input_token_read = false;
@@ -68,13 +66,13 @@ bool gsswrap_initiate(const struct gsswrap_credential* gcred,
             &gss_ctx,
             gcred->server_name,
             GSS_C_NO_OID,
-            req_flags,
+            gctx->req_flags,
             GSS_C_INDEFINITE, // maximum permitted lifetime
             NULL,  // channel bindings
             &input_token,
             NULL,  // actual mechanism type
             &output_token,
-            &ret_flags,
+            &gctx->ret_flags,
             NULL); // actual context validity time
 
         // free input_token immediately as it was just consumed
@@ -120,9 +118,6 @@ bool gsswrap_initiate(const struct gsswrap_credential* gcred,
             break;
         }
     }
-
-    // TODO verify requested flags were used by checking
-    // if ((ret_flags & req_flags) != req_flags) ... and then what if not?
 
 cleanup:
     gss_release_buffer(&minor, &output_token);

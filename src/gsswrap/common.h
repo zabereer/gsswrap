@@ -40,4 +40,26 @@ void gsswrap_destroy_context(struct gsswrap_context*);
 const char* gsswrap_last_credential_error(struct gsswrap_credential*);
 const char* gsswrap_last_context_error(struct gsswrap_context*);
 
+/**
+ *
+ */
+void gsswrap_set_confidentiality_available(struct gsswrap_context*);
+void gsswrap_set_delegated(struct gsswrap_context*);
+void gsswrap_set_integrity_available(struct gsswrap_context*);
+void gsswrap_set_mutual_auth(struct gsswrap_context*);
+void gsswrap_set_out_of_sequence_detection(struct gsswrap_context*);
+void gsswrap_set_replay_detection(struct gsswrap_context*);
+void gsswrap_set_all_flags(struct gsswrap_context*);
+void gsswrap_clear_all_flags(struct gsswrap_context*);
+
+/**
+ * 
+ */
+bool gsswrap_confidentiality_available(const struct gsswrap_context*);
+bool gsswrap_delegated(const struct gsswrap_context*);
+bool gsswrap_integrity_available(const struct gsswrap_context*);
+bool gsswrap_mutual_auth(const struct gsswrap_context*);
+bool gsswrap_out_of_sequence_detection(const struct gsswrap_context*);
+bool gsswrap_replay_detection(const struct gsswrap_context*);
+
 #endif

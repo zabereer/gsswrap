@@ -12,6 +12,7 @@ struct gsswrap_context* make_context(gsswrap_send_token_fn send_function,
     gctx->free_fn = free_function;
     gctx->client_name = GSS_C_NO_NAME;
     gctx->client_display_name = NULL;
+    gctx->delegated_client_cred = GSS_C_NO_CREDENTIAL;
     init_status(&gctx->status);
     gctx->req_flags = 0;
     gctx->ret_flags = 0;
@@ -21,9 +22,11 @@ struct gsswrap_context* make_context(gsswrap_send_token_fn send_function,
 void reset_context(struct gsswrap_context* gctx)
 {
     gss_release_name(&gctx->status.minor, &gctx->client_name);
-    free((void*)gctx->client_display_name);
     gctx->client_name = GSS_C_NO_NAME;
+    free((void*)gctx->client_display_name);
     gctx->client_display_name = NULL;
+    gss_release_cred(&gctx->status.minor, &gctx->delegated_client_cred);
+    gctx->delegated_client_cred = GSS_C_NO_CREDENTIAL;
 }
 
 void destroy_context(struct gsswrap_context* gctx)

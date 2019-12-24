@@ -18,6 +18,7 @@ struct gsswrap_context
     // populated by server acceptor
     gss_name_t client_name;
     const char* client_display_name;
+    gss_cred_id_t delegated_client_cred;
 
     struct gsswrap_status status;
 

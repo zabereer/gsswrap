@@ -41,7 +41,7 @@ const char* gsswrap_last_credential_error(struct gsswrap_credential*);
 const char* gsswrap_last_context_error(struct gsswrap_context*);
 
 /**
- *
+ * Client side only.
  */
 void gsswrap_set_confidentiality_available(struct gsswrap_context*);
 void gsswrap_set_delegated(struct gsswrap_context*);
@@ -53,7 +53,7 @@ void gsswrap_set_all_flags(struct gsswrap_context*);
 void gsswrap_clear_all_flags(struct gsswrap_context*);
 
 /**
- * 
+ * Both client and server side.
  */
 bool gsswrap_confidentiality_available(const struct gsswrap_context*);
 bool gsswrap_delegated(const struct gsswrap_context*);

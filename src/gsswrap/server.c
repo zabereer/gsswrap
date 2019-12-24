@@ -72,7 +72,7 @@ bool gsswrap_accept(const struct gsswrap_credential* gcred,
             &output_token,
             &gctx->ret_flags,
             NULL,  // actual context validity time
-            NULL); // delegated credentials - TODO handle this
+            &gctx->delegated_client_cred);
 
         if (input_token_read)
         {

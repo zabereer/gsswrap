@@ -15,10 +15,16 @@ import (
 	"unsafe"
 )
 
+var (
+	addr     string
+	con      *net.Conn
+	userdata string
+)
+
 func main() {
 	server := flag.Bool("server", false,
 		"set to run as server, false to run as client")
-	addr := flag.String("address", "",
+	tmp_addr := flag.String("address", "",
 		"mandatory network address (host:port)")
 	serverName := flag.String("servername", "",
 		"mandatory server name")
@@ -29,8 +35,11 @@ func main() {
 		"client name (not applicable for server)")
 	clientPass := flag.String("clientpass", "",
 		"client password (optional, and not applicable for server)")
+
 	flag.Parse()
-	if len(*addr) == 0 || len(*serverName) == 0 {
+
+	addr = *tmp_addr
+	if len(addr) == 0 || len(*serverName) == 0 {
 		flag.Usage()
 		os.Exit(1)
 	}
@@ -46,42 +55,38 @@ func main() {
 	defer C.free(unsafe.Pointer(cservername))
 
 	if *server {
-		runServer(addr, cred, cservername, *hostbased)
+		runServer(cred, cservername, *hostbased)
 	} else {
-		runClient(addr, cred, cservername, *hostbased, clientName, clientPass)
+		runClient(cred, cservername, *hostbased, clientName, clientPass)
 	}
 }
 
-var con net.Conn
-var userdata string
-
 func runServer(
-	addr *string,
 	cred *C.struct_gsswrap_credential,
 	cservername *C.char,
 	hostbased bool) {
 
-	log.Print("Running as server on ", *addr)
+	log.Print("Running as server on ", addr)
 
 	if !C.gsswrap_set_server_cred(cred, cservername, hostbased == true) {
 		log.Fatal("Failed to set server credential - ",
 			C.gsswrap_last_credential_error(cred))
 	}
 
-	listener, err := net.Listen("tcp", *addr)
+	listener, err := net.Listen("tcp", addr)
 	if err != nil {
-		log.Fatal("Error trying to listen on ", *addr, " - ", err)
+		log.Fatal("Error trying to listen on ", addr, " - ", err)
 	}
 
 	connectionNumber := 0
 
 	for {
-		con, err = listener.Accept()
+		tmpcon, err := listener.Accept()
 		if err != nil {
 			log.Fatal("Failed to accept - ", err)
 		}
-
-		defer con.Close()
+		con = &tmpcon
+		defer (*con).Close()
 		ctx := C.glue_make_context()
 		defer C.gsswrap_destroy_context(ctx)
 		userdata = fmt.Sprintf("server connection %d", connectionNumber)
@@ -98,14 +103,13 @@ func runServer(
 }
 
 func runClient(
-	addr *string,
 	cred *C.struct_gsswrap_credential,
 	cservername *C.char,
 	hostbased bool,
 	clientName *string,
 	clientPass *string) {
 
-	log.Print("Running as client on ", *addr)
+	log.Print("Running as client on ", addr)
 
 	if !C.gsswrap_set_server_name(cred, cservername, hostbased == true) {
 		log.Fatal("Failed to set server name - ",
@@ -116,13 +120,13 @@ func runClient(
 		log.Fatal("Failed to set client credential")
 	}
 
-	c, err := net.Dial("tcp", *addr)
-	if err != nil {
-		log.Fatal("Error trying to connect to ", *addr, " - ", err)
-	}
+	defer func() {
+		log.Print("deferred closing connection")
+		if con != nil {
+			(*con).Close()
+		}
+	}()
 
-	con = c
-	defer con.Close()
 	ctx := C.glue_make_context()
 	defer C.gsswrap_destroy_context(ctx)
 	userdata = "client connection"
@@ -162,10 +166,27 @@ func setClientCred(
 	return true
 }
 
+func setupConnection() bool {
+	if con == nil {
+		c, err := net.Dial("tcp", addr)
+		if err != nil {
+			log.Print("Error trying to connect to ", addr, " - ", err)
+			return false
+		}
+
+		con = &c
+	}
+	return true
+}
+
 //export sendToPeer
 func sendToPeer(length C.size_t, data unsafe.Pointer) bool {
+	if !setupConnection() {
+		return false
+	}
+
 	log.Print("Sending ", length, " bytes to peer")
-	err := binary.Write(con, binary.LittleEndian, length)
+	err := binary.Write(*con, binary.LittleEndian, length)
 	if err != nil {
 		log.Fatal("Error sending length to peer - ", err)
 	}
@@ -176,7 +197,7 @@ func sendToPeer(length C.size_t, data unsafe.Pointer) bool {
 		log.Fatal("Incorrect length of byte buffer")
 	}
 
-	err = binary.Write(con, binary.LittleEndian, d)
+	err = binary.Write(*con, binary.LittleEndian, d)
 	if err != nil {
 		log.Fatal("Error sending data to peer - ", err)
 	}
@@ -187,13 +208,13 @@ func sendToPeer(length C.size_t, data unsafe.Pointer) bool {
 func recvFromPeer() (C.size_t, unsafe.Pointer) {
 	log.Print("Receiving from peer")
 	var length C.size_t
-	err := binary.Read(con, binary.LittleEndian, &length)
+	err := binary.Read(*con, binary.LittleEndian, &length)
 	if err != nil {
 		log.Fatal("Error receiving length from peer - ", err)
 	}
 
 	data := make([]byte, length)
-	err = binary.Read(con, binary.LittleEndian, data)
+	err = binary.Read(*con, binary.LittleEndian, data)
 	if err != nil {
 		log.Fatal("Error receiving data from peer - ", err)
 	}

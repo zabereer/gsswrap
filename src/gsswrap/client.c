@@ -43,6 +43,23 @@ bool gsswrap_set_client_cred_pw(struct gsswrap_credential* gcred,
     return !GSS_ERROR(gcred->status.major);
 }
 
+bool gsswrap_set_client_cred_delegated(struct gsswrap_credential* gcred,
+                                       struct gsswrap_context* gctx)
+{
+    if (gsswrap_delegated(gctx) &&
+        gctx->delegated_client_cred != GSS_C_NO_CREDENTIAL)
+    {
+        release_name(gcred, &gcred->client_name);
+        release_cred(gcred, &gcred->client_cred);
+        gcred->client_name = gctx->client_name;
+        gcred->client_cred = gctx->delegated_client_cred;
+        gctx->client_name = GSS_C_NO_NAME;
+        gctx->delegated_client_cred = GSS_C_NO_CREDENTIAL;
+        return true;
+    }
+    return false;
+}
+
 bool gsswrap_initiate(const struct gsswrap_credential* gcred,
                       struct gsswrap_context* gctx,
                       void* user_data)

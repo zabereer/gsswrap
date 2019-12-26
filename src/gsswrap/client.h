@@ -21,6 +21,8 @@ bool gsswrap_set_client_cred(struct gsswrap_credential*,
 bool gsswrap_set_client_cred_pw(struct gsswrap_credential*,
                                 const char* const principal,
                                 const char* const password);
+bool gsswrap_set_client_cred_delegated(struct gsswrap_credential*,
+                                       struct gsswrap_context*);
 
 /**
  * 

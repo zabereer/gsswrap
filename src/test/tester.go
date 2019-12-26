@@ -16,29 +16,43 @@ import (
 )
 
 var (
-	addr     string
-	con      *net.Conn
-	userdata string
+	addr          string
+	con           *net.Conn
+	userdata      string
+	fwdAddr       string
+	fwdServerName string
+	fwdHostbased  bool
 )
 
 func main() {
 	server := flag.Bool("server", false,
 		"set to run as server, false to run as client")
-	tmp_addr := flag.String("address", "",
+	tmpAddr := flag.String("address", "",
 		"mandatory network address (host:port)")
 	serverName := flag.String("servername", "",
 		"mandatory server name")
 	hostbased := flag.Bool("hostbased", false,
-		"true for GSS_C_NT_HOSTBASED_SERVICE principal, "+
-			"false for GSS_C_NT_USERNAME principal")
+		"true for GSS_C_NT_HOSTBASED_SERVICE server name principal, "+
+			"false for GSS_C_NT_USERNAME server name principal")
 	clientName := flag.String("clientname", "",
 		"client name (not applicable for server)")
 	clientPass := flag.String("clientpass", "",
 		"client password (optional, and not applicable for server)")
+	tmpFwdAddr := flag.String("forward", "",
+		"forwarding network address using delegated client credential")
+	tmpFwdServerName := flag.String("forward-servername", "",
+		"forwarding server name using delegated client credentials")
+	tmpFwdHostbased := flag.Bool("forward-hostbased", false,
+		"true for GSS_C_NT_HOSTBASED_SERVICE forward-servername principal, "+
+			"false for GSS_C_NT_USERNAME forward-servername principal")
 
 	flag.Parse()
 
-	addr = *tmp_addr
+	addr = *tmpAddr
+	fwdAddr = *tmpFwdAddr
+	fwdServerName = *tmpFwdServerName
+	fwdHostbased = *tmpFwdHostbased
+
 	if len(addr) == 0 || len(*serverName) == 0 {
 		flag.Usage()
 		os.Exit(1)
@@ -46,6 +60,15 @@ func main() {
 
 	if *server && (*clientName != "" || *clientPass != "") {
 		log.Fatal("clientname and clientpass are not applicable for server")
+	}
+
+	if !*server && (fwdAddr != "" || fwdServerName != "") {
+		log.Fatal("forward address and forward-servername are not " +
+			"applicable for client")
+	}
+
+	if (fwdAddr == "") != (fwdServerName == "") {
+		log.Fatal("forward address and forward-servername are both required")
 	}
 
 	cred := C.gsswrap_make_credential()
@@ -86,22 +109,53 @@ func runServer(
 			log.Fatal("Failed to accept - ", err)
 		}
 		con = &tmpcon
-		defer (*con).Close()
 		ctx := C.glue_make_context()
-		defer C.gsswrap_destroy_context(ctx)
 		userdata = fmt.Sprintf("server connection %d", connectionNumber)
 		cuserdata := C.CString(userdata)
-		defer C.free(unsafe.Pointer(cuserdata))
 
 		if C.gsswrap_accept(cred, ctx, unsafe.Pointer(cuserdata)) {
 			log.Print("success ->",
 				C.GoString(C.gsswrap_client_principal(ctx)), "<-")
 			logFlags(ctx)
+			forwardDelegated(ctx)
 		} else {
 			log.Print("gsswrap_accept failure ",
 				C.GoString(C.gsswrap_last_context_error(ctx)))
 		}
+
+		C.free(unsafe.Pointer(cuserdata))
+		C.gsswrap_destroy_context(ctx)
+		(*con).Close()
 	}
+}
+
+func forwardDelegated(ctx *C.struct_gsswrap_context) {
+	if fwdAddr == "" || fwdServerName == "" {
+		return
+	}
+	if C.gsswrap_delegated(ctx) == false {
+		log.Fatal("client credential was not delegated")
+	}
+
+	cred := C.gsswrap_make_credential()
+	if C.gsswrap_set_client_cred_delegated(cred, ctx) == false {
+		log.Fatal("failed to create delegated client credential")
+	}
+
+	taddr := addr
+	tcon := con
+	defer func() {
+		addr = taddr
+		con = tcon
+	}()
+
+	addr = fwdAddr
+	con = nil
+
+	cfwdservername := C.CString(fwdServerName)
+	defer C.free(unsafe.Pointer(cfwdservername))
+
+	exchangeWithServer(cred, cfwdservername, fwdHostbased)
 }
 
 func runClient(
@@ -113,34 +167,11 @@ func runClient(
 
 	log.Print("Running as client on ", addr)
 
-	if !C.gsswrap_set_server_name(cred, cservername, hostbased == true) {
-		log.Fatal("Failed to set server name - ",
-			C.gsswrap_last_credential_error(cred))
-	}
-
 	if !setClientCred(cred, clientName, clientPass) {
 		log.Fatal("Failed to set client credential")
 	}
 
-	defer func() {
-		if con != nil {
-			(*con).Close()
-		}
-	}()
-
-	ctx := C.glue_make_context()
-	defer C.gsswrap_destroy_context(ctx)
-	userdata = "client connection"
-	cuserdata := C.CString(userdata)
-	defer C.free(unsafe.Pointer(cuserdata))
-
-	if C.gsswrap_initiate(cred, ctx, unsafe.Pointer(cuserdata)) {
-		log.Print("succes")
-		logFlags(ctx)
-	} else {
-		log.Print("gsswrap_initiate failure ",
-			C.GoString(C.gsswrap_last_context_error(ctx)))
-	}
+	exchangeWithServer(cred, cservername, hostbased)
 }
 
 func setClientCred(
@@ -167,6 +198,36 @@ func setClientCred(
 		}
 	}
 	return true
+}
+
+func exchangeWithServer(
+	cred *C.struct_gsswrap_credential,
+	cservername *C.char,
+	hostbased bool) {
+	defer func() {
+		if con != nil {
+			(*con).Close()
+		}
+	}()
+
+	if !C.gsswrap_set_server_name(cred, cservername, hostbased == true) {
+		log.Fatal("Failed to set server name - ",
+			C.gsswrap_last_credential_error(cred))
+	}
+
+	ctx := C.glue_make_context()
+	defer C.gsswrap_destroy_context(ctx)
+	userdata = "client connection"
+	cuserdata := C.CString(userdata)
+	defer C.free(unsafe.Pointer(cuserdata))
+
+	if C.gsswrap_initiate(cred, ctx, unsafe.Pointer(cuserdata)) {
+		log.Print("succes")
+		logFlags(ctx)
+	} else {
+		log.Print("gsswrap_initiate failure ",
+			C.GoString(C.gsswrap_last_context_error(ctx)))
+	}
 }
 
 func logFlags(ctx *C.struct_gsswrap_context) {

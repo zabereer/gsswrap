@@ -3,6 +3,8 @@
 #include "context.h"
 #include "credential.h"
 
+#pragma GCC visibility push(default)
+
 bool gsswrap_set_server_name(struct gsswrap_credential* gcred,
                              const char* const principal,
                              const bool host_based)
@@ -142,3 +144,5 @@ cleanup:
     gss_delete_sec_context(&gctx->status.minor, &gss_ctx, GSS_C_NO_BUFFER);
     return established;
 }
+
+#pragma GCC visibility pop

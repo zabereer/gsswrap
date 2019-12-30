@@ -3,6 +3,8 @@
 #include "context.h"
 #include "credential.h"
 
+#pragma GCC visibility push(default)
+
 struct gsswrap_credential* gsswrap_make_credential()
 {
     return make_credential();
@@ -106,3 +108,5 @@ bool gsswrap_replay_detection(const struct gsswrap_context* gctx)
 {
     return gctx->ret_flags & GSS_C_REPLAY_FLAG;
 }
+
+#pragma GCC visibility pop

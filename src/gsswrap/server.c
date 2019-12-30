@@ -8,6 +8,8 @@
 
 #include <string.h>
 
+#pragma GCC visibility push(default)
+
 void gsswrap_set_keytab_file(const char* const keytabfile)
 {
     krb5_gss_register_acceptor_identity(keytabfile);
@@ -122,3 +124,5 @@ const char* gsswrap_client_principal(struct gsswrap_context* gctx)
     }
     return gctx->client_display_name;
 }
+
+#pragma GCC visibility pop

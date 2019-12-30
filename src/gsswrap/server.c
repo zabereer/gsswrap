@@ -105,7 +105,6 @@ bool gsswrap_accept(const struct gsswrap_credential* gcred,
     }
 
     gss_release_buffer(&minor, &output_token);
-    // TODO maybe keep context somewhere for encrypted exchange or delegation?
     gss_delete_sec_context(&gctx->status.minor, &gss_ctx, GSS_C_NO_BUFFER);
     return established;
 }

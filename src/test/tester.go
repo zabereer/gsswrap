@@ -271,7 +271,7 @@ func sendToPeer(length C.size_t, data unsafe.Pointer) bool {
 	}
 
 	d := C.GoBytes(data, C.int(length))
-	log.Print(hex.Dump(d))
+	log.Print("\n", hex.Dump(d))
 	if len(d) != int(length) {
 		log.Fatal("Incorrect length of byte buffer")
 	}
@@ -298,7 +298,7 @@ func recvFromPeer() (C.size_t, unsafe.Pointer) {
 		log.Fatal("Error receiving data from peer - ", err)
 	}
 	log.Print("Received ", length, " bytes from peer")
-	log.Print(hex.Dump(data))
+	log.Print("\n", hex.Dump(data))
 	return length, C.CBytes(data) // C.CBytes has to be C.free()'d
 }
 

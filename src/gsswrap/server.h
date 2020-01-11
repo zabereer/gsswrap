@@ -17,20 +17,27 @@ void gsswrap_set_keytab_file(const char* const);
  * If host_based flag is true then "server" will become
  * "server/host.com@REAL.COM" (host based service like ssh) where
  * "host.com" is the fully qualified host name.
+ * Returns true if successful.
  */
 bool gsswrap_set_server_cred(struct gsswrap_credential*,
                              const char* const principal,
                              const bool host_based);
 
 /**
- * 
+ * Accept a security token exchange request from a client. Before calling
+ * this function a client connection must have been accepted.
+ * The send/recv/free functions in gsswrap_context will be called one or
+ * more times before gsswrap_accept() returns.
+ * Returns true if successful.
  */
 bool gsswrap_accept(const struct gsswrap_credential*,
                     struct gsswrap_context*,
                     void* user_data);
 
 /**
- * 
+ * If gsswrap_accept() was successful then the authenticated client
+ * principal can be retrieved using this function.
+ * Returns NULL if not successful (gsswrap_accept() did not succeed).
  */
 const char* gsswrap_client_principal(struct gsswrap_context*);
 

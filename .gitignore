@@ -5,7 +5,9 @@
 # include these files and everthing in src
 !.gitignore
 !configure.ac
+!LICENSE
 !Makefile.am
+!README.md
 !src/**
 # except this anywhere
 Makefile.in

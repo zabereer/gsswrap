@@ -58,7 +58,22 @@ gsswrap_destroy_credential(cred);
 ```
 
 ### Credential delegation
+A server may use authenticated client credentials to delegate requests to other servers on client's behalf.
+```C
+// after accepting client connection then run negotiation loop
+// gsswrap_accept() will call functions pointeed to by ctx
+if (gsswrap_accept(cred, ctx, user_data)) {
+    verify_client_principal(gsswrap_client_principal(ctx));
 
+    // delegate client request to other server
+    struct gsswrap_credential* deleg_cred = gsswrap_make_credential();
+    gsswrap_set_client_cred_delegated(deleg_cred, ctx);
+    // set target server name
+    gsswrap_set_server_name(deleg_cred, "delegated-server-name", true);
+    // use deleg_cred as client credential as in client example
+    connect_to_delegated_server(deleg_cred);
+}
+```
 
 ## Build from checked out repo
 gsswrap uses standard autoconf/automake.

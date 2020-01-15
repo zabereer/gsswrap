@@ -67,7 +67,6 @@ bool gsswrap_initiate(const struct gsswrap_credential* gcred,
                       void* user_data)
 {
     reset_context(gctx);
-    gss_ctx_id_t gss_ctx = GSS_C_NO_CONTEXT;
     gss_buffer_desc input_token = GSS_C_EMPTY_BUFFER;
     gss_buffer_desc output_token = GSS_C_EMPTY_BUFFER;
     if (!gctx->req_flags)
@@ -82,7 +81,7 @@ bool gsswrap_initiate(const struct gsswrap_credential* gcred,
         gctx->status.major = gss_init_sec_context(
             &gctx->status.minor,
             gcred->client_cred,
-            &gss_ctx,
+            &gctx->gss_ctx,
             gcred->server_name,
             GSS_C_NO_OID,
             gctx->req_flags,
@@ -140,7 +139,6 @@ bool gsswrap_initiate(const struct gsswrap_credential* gcred,
 
 cleanup:
     gss_release_buffer(&minor, &output_token);
-    gss_delete_sec_context(&gctx->status.minor, &gss_ctx, GSS_C_NO_BUFFER);
     return established;
 }
 

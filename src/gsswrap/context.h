@@ -11,9 +11,14 @@
  */
 struct gsswrap_context
 {
+    // functions called by gsswrap_initiate() and gsswrap_accept()
     gsswrap_send_token_fn send_fn;
     gsswrap_recv_token_fn recv_fn;
     gsswrap_free_buffer_fn free_fn;
+
+    // GSS security context handle established by
+    // gsswrap_initiate() and gsswrap_accept()
+    gss_ctx_id_t gss_ctx;
 
     // populated by server acceptor
     gss_name_t client_name;

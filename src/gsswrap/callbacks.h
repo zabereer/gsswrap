@@ -35,6 +35,7 @@ typedef bool (*gsswrap_recv_token_fn)(
 
 /**
  * Called by gsswrap to free buffer containing received data from peer.
+ * This function is only called if gsswrap_recv_token_fn() returned true;
  */
 typedef void (*gsswrap_free_buffer_fn)(
     void* buffer, size_t length, void* user_data);

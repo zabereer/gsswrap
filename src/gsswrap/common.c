@@ -161,23 +161,38 @@ bool gsswrap_encrypt_send(struct gsswrap_context* gctx,
                           size_t length,
                           void* user_data)
 {
-    gss_buffer_desc input_buffer = {.length = length,
-                                    .value = (void*)buffer};
-    gss_buffer_desc output_buffer = GSS_C_EMPTY_BUFFER;
-    gctx->status.major = gss_wrap(&gctx->status.minor,
-                                  gctx->gss_ctx,
-                                  true, // confidentiality and integrity
-                                  GSS_C_QOP_DEFAULT,
-                                  &input_buffer,
-                                  NULL,
-                                  &output_buffer);
-    bool ok = GSS_ERROR(gctx->status.major) &&
-        gctx->send_fn(output_buffer.value,
-                      output_buffer.length,
-                      user_data);
+    void* encrypted_buffer;
+    size_t encrypted_buffer_length;
+    bool ok = gsswrap_encrypt(gctx,
+                              buffer,
+                              length,
+                              &encrypted_buffer,
+                              &encrypted_buffer_length);
+    ok = ok && gctx->send_fn(encrypted_buffer,
+                             encrypted_buffer_length,
+                             user_data);
+    return ok;
+}
 
-    OM_uint32 minor;
-    gss_release_buffer(&minor, &output_buffer);
+bool gsswrap_recv_decrypt(struct gsswrap_context* gctx,
+                          void** output_buffer,
+                          size_t* output_length,
+                          void* user_data)
+{
+    void* encrypted_buffer;
+    size_t encrypted_buffer_length;
+    bool ok = gctx->recv_fn(&encrypted_buffer,
+                            &encrypted_buffer_length,
+                            user_data);
+    if (ok)
+    {
+        ok = gsswrap_decrypt(gctx,
+                             encrypted_buffer,
+                             encrypted_buffer_length,
+                             output_buffer,
+                             output_length);
+        gctx->free_fn(encrypted_buffer, encrypted_buffer_length, user_data);
+    }
     return ok;
 }
 

@@ -8,6 +8,9 @@
 
 #include "callbacks.h"
 
+#include <stdbool.h>
+#include <stddef.h>
+
 struct gsswrap_credential;
 struct gsswrap_context;
 
@@ -75,5 +78,44 @@ bool gsswrap_integrity_available(const struct gsswrap_context*);
 bool gsswrap_mutual_auth(const struct gsswrap_context*);
 bool gsswrap_out_of_sequence_detection(const struct gsswrap_context*);
 bool gsswrap_replay_detection(const struct gsswrap_context*);
+
+/**
+ * Encrypt or decrypt a buffer using the established security context.
+ * Ownership of the output_buffer remains with gsswrap, do not free it.
+ * Returns true if success, false if not after which none of output_buffer
+ * nor output_length is updated.
+ */
+bool gsswrap_encrypt(struct gsswrap_context*,
+                     const void* buffer,
+                     const size_t length,
+                     void** output_buffer,
+                     size_t* output_length);
+bool gsswrap_decrypt(struct gsswrap_context*,
+                     const void* buffer,
+                     const size_t length,
+                     void** output_buffer,
+                     size_t* output_length);
+
+/**
+ * Encrypt and send the buffer using the stored send_func in the context.
+ * Returns true if buffer was successfully encrypted and send_func succeeded.
+ */
+bool gsswrap_encrypt_send(struct gsswrap_context*,
+                          const void* buffer,
+                          size_t length,
+                          void* user_data);
+
+/**
+ * Receive a buffer via recv_func stored in the context, then decrypt it and
+ * update output_buffer and output_length. The buffer input buffer obtained
+ * via the recv_func will be freed by free_func stored in the context.
+ * Ownership of the output_buffer remains with gsswrap, do not free it.
+ * Returns true if a success, false if not after which none of output_buffer
+ * nor output_length is updated.
+ */
+bool gsswrap_recv_decrypt(struct gsswrap_context*,
+                          void** output_buffer,
+                          size_t* output_length,
+                          void* user_data);
 
 #endif

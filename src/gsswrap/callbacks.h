@@ -17,11 +17,11 @@
 
 /**
  * When called by gsswrap send the data pointed to by buffer for size
- * of len to peer. Return true if all data successfully sent, false to
+ * of len to peer. Return true if *all* data successfully sent, false to
  * abort the security context negotiation.
  */
 typedef bool (*gsswrap_send_token_fn)(
-    const void* buffer, size_t len, void* user_data);
+    const void* buffer, size_t length, void* user_data);
 
 /**
  * When called by gsswrap to receive data from peer update *buffer and
@@ -31,12 +31,12 @@ typedef bool (*gsswrap_send_token_fn)(
  * release the buffer.
  */
 typedef bool (*gsswrap_recv_token_fn)(
-    void** buffer, size_t* len, void* user_data);
+    void** buffer, size_t* length, void* user_data);
 
 /**
  * Called by gsswrap to free buffer containing received data from peer.
  */
 typedef void (*gsswrap_free_buffer_fn)(
-    void* buffer, size_t len, void* user_data);
+    void* buffer, size_t length, void* user_data);
 
 #endif

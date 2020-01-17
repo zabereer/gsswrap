@@ -3,6 +3,8 @@
 #include "context.h"
 #include "credential.h"
 
+#include <gssapi/gssapi.h>
+
 #pragma GCC visibility push(default)
 
 struct gsswrap_credential* gsswrap_make_credential()
@@ -107,6 +109,76 @@ bool gsswrap_out_of_sequence_detection(const struct gsswrap_context* gctx)
 bool gsswrap_replay_detection(const struct gsswrap_context* gctx)
 {
     return gctx->ret_flags & GSS_C_REPLAY_FLAG;
+}
+
+bool gsswrap_encrypt(struct gsswrap_context* gctx,
+                     const void* buffer,
+                     const size_t length,
+                     void** output_buffer,
+                     size_t* output_length)
+{
+    gss_buffer_desc input_buffer = {.length = length,
+                                    .value = (void*)buffer};
+    reset_wrap_buffer(gctx);
+    gctx->status.major = gss_wrap(&gctx->status.minor,
+                                  gctx->gss_ctx,
+                                  true, // confidentiality and integrity
+                                  GSS_C_QOP_DEFAULT,
+                                  &input_buffer,
+                                  NULL,
+                                  &gctx->wrap_buffer);
+    if (GSS_ERROR(gctx->status.major))
+        return false;
+    *output_buffer = gctx->wrap_buffer.value;
+    *output_length = gctx->wrap_buffer.length;
+    return true;
+}
+
+bool gsswrap_decrypt(struct gsswrap_context* gctx,
+                     const void* buffer,
+                     const size_t length,
+                     void** output_buffer,
+                     size_t* output_length)
+{
+    gss_buffer_desc input_buffer = {.length = length,
+                                    .value = (void*)buffer};
+    reset_wrap_buffer(gctx);
+    gctx->status.major = gss_unwrap(&gctx->status.minor,
+                                    gctx->gss_ctx,
+                                    &input_buffer,
+                                    &gctx->wrap_buffer,
+                                    NULL,
+                                    NULL);
+    if (GSS_ERROR(gctx->status.major))
+        return false;
+    *output_buffer = gctx->wrap_buffer.value;
+    *output_length = gctx->wrap_buffer.length;
+    return true;
+}
+
+bool gsswrap_encrypt_send(struct gsswrap_context* gctx,
+                          const void* buffer,
+                          size_t length,
+                          void* user_data)
+{
+    gss_buffer_desc input_buffer = {.length = length,
+                                    .value = (void*)buffer};
+    gss_buffer_desc output_buffer = GSS_C_EMPTY_BUFFER;
+    gctx->status.major = gss_wrap(&gctx->status.minor,
+                                  gctx->gss_ctx,
+                                  true, // confidentiality and integrity
+                                  GSS_C_QOP_DEFAULT,
+                                  &input_buffer,
+                                  NULL,
+                                  &output_buffer);
+    bool ok = GSS_ERROR(gctx->status.major) &&
+        gctx->send_fn(output_buffer.value,
+                      output_buffer.length,
+                      user_data);
+
+    OM_uint32 minor;
+    gss_release_buffer(&minor, &output_buffer);
+    return ok;
 }
 
 #pragma GCC visibility pop

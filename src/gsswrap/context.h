@@ -29,6 +29,7 @@ struct gsswrap_context
 
     OM_uint32 req_flags;
     OM_uint32 ret_flags;
+    gss_buffer_desc wrap_buffer;
 };
 
 // Internal functions used by both client and server.
@@ -37,5 +38,6 @@ struct gsswrap_context* make_context(gsswrap_send_token_fn,
                                      gsswrap_free_buffer_fn);
 void reset_context(struct gsswrap_context*);
 void destroy_context(struct gsswrap_context*);
+void reset_wrap_buffer(struct gsswrap_context*);
 
 #endif

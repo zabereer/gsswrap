@@ -118,6 +118,7 @@ func runServer(
 				C.GoString(C.gsswrap_client_principal(ctx)), "<-")
 			logFlags(ctx)
 			forwardDelegated(ctx)
+			sendAndReceiveSomeData("server", "client")
 		} else {
 			log.Print("gsswrap_accept failure ",
 				C.GoString(C.gsswrap_last_context_error(ctx)))
@@ -224,6 +225,7 @@ func exchangeWithServer(
 	if C.gsswrap_initiate(cred, ctx, unsafe.Pointer(cuserdata)) {
 		log.Print("succes")
 		logFlags(ctx)
+		sendAndReceiveSomeData("client", "server")
 	} else {
 		log.Print("gsswrap_initiate failure ",
 			C.GoString(C.gsswrap_last_context_error(ctx)))
@@ -258,6 +260,19 @@ func setupConnection() bool {
 	return true
 }
 
+func sendAndReceiveSomeData(from, to string) {
+	expectedReceived := "hello from " + to
+	fromPayload := []byte("hello from " + from)
+	sendToPeer(C.size_t(len(fromPayload)), unsafe.Pointer(&fromPayload[0]))
+	len, bufptr := recvFromPeer()
+	val := C.GoString((*C.char)(bufptr))
+	C.free(unsafe.Pointer(bufptr))
+	log.Print("received ", len, " bytes: ", val)
+	if val != expectedReceived {
+		log.Fatal("Did not receive expected: ", expectedReceived)
+	}
+}
+
 //export sendToPeer
 func sendToPeer(length C.size_t, data unsafe.Pointer) bool {
 	if !setupConnection() {
@@ -271,7 +286,7 @@ func sendToPeer(length C.size_t, data unsafe.Pointer) bool {
 	}
 
 	d := C.GoBytes(data, C.int(length))
-	log.Print("\n", hex.Dump(d))
+	log.Print("--==>\n", hex.Dump(d))
 	if len(d) != int(length) {
 		log.Fatal("Incorrect length of byte buffer")
 	}
@@ -283,6 +298,7 @@ func sendToPeer(length C.size_t, data unsafe.Pointer) bool {
 	return true
 }
 
+// returned pointer has to be C.free()'d
 //export recvFromPeer
 func recvFromPeer() (C.size_t, unsafe.Pointer) {
 	log.Print("Receiving from peer")
@@ -298,7 +314,7 @@ func recvFromPeer() (C.size_t, unsafe.Pointer) {
 		log.Fatal("Error receiving data from peer - ", err)
 	}
 	log.Print("Received ", length, " bytes from peer")
-	log.Print("\n", hex.Dump(data))
+	log.Print("<==--\n", hex.Dump(data))
 	return length, C.CBytes(data) // C.CBytes has to be C.free()'d
 }
 

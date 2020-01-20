@@ -118,7 +118,7 @@ func runServer(
 				C.GoString(C.gsswrap_client_principal(ctx)), "<-")
 			logFlags(ctx)
 			forwardDelegated(ctx)
-			sendAndReceiveSomeData("server", "client")
+			sendAndReceiveSomeData(ctx, "server", "client")
 		} else {
 			log.Print("gsswrap_accept failure ",
 				C.GoString(C.gsswrap_last_context_error(ctx)))
@@ -225,7 +225,7 @@ func exchangeWithServer(
 	if C.gsswrap_initiate(cred, ctx, unsafe.Pointer(cuserdata)) {
 		log.Print("succes")
 		logFlags(ctx)
-		sendAndReceiveSomeData("client", "server")
+		sendAndReceiveSomeData(ctx, "client", "server")
 	} else {
 		log.Print("gsswrap_initiate failure ",
 			C.GoString(C.gsswrap_last_context_error(ctx)))
@@ -260,16 +260,43 @@ func setupConnection() bool {
 	return true
 }
 
-func sendAndReceiveSomeData(from, to string) {
+func sendAndReceiveSomeData(ctx *C.struct_gsswrap_context, from, to string) {
 	expectedReceived := "hello from " + to
 	fromPayload := []byte("hello from " + from)
 	sendToPeer(C.size_t(len(fromPayload)), unsafe.Pointer(&fromPayload[0]))
-	len, bufptr := recvFromPeer()
+	size, bufptr := recvFromPeer()
 	val := C.GoString((*C.char)(bufptr))
 	C.free(unsafe.Pointer(bufptr))
-	log.Print("received ", len, " bytes: ", val)
+	log.Print("received ", size, " bytes: ", val)
 	if val != expectedReceived {
-		log.Fatal("Did not receive expected: ", expectedReceived)
+		log.Fatal("Did not receive expected in clear: ", expectedReceived)
+	}
+	cuserdata := C.CString(userdata)
+	defer C.free(unsafe.Pointer(cuserdata))
+
+	ok := C.gsswrap_encrypt_send(ctx,
+		unsafe.Pointer(&fromPayload[0]),
+		C.size_t(len(fromPayload)),
+		unsafe.Pointer(cuserdata))
+	if !ok {
+		log.Fatal("Failed to send encrypted payload")
+	}
+
+	var decryptBuffer unsafe.Pointer
+	var decryptSize C.size_t
+
+	ok = C.gsswrap_recv_decrypt(ctx,
+		&decryptBuffer,
+		&decryptSize,
+		unsafe.Pointer(cuserdata))
+	if !ok {
+		log.Fatal("Failed to receive encrypted payload")
+	}
+
+	val = C.GoString((*C.char)(decryptBuffer))
+	log.Print("received ", decryptSize, " bytes: ", val)
+	if val != expectedReceived {
+		log.Fatal("Did not receive expected encrypted: ", expectedReceived)
 	}
 }
 

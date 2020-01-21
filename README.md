@@ -75,6 +75,9 @@ if (gsswrap_accept(cred, ctx, user_data)) {
 }
 ```
 
+### Confidentiality and Integrity
+See `gsswrap_encrypt()`, `gsswrap_decrypt()`, `gsswrap_encrypt_send()` and `gsswrap_recv_decrypt()` functions in `common.h` for how to encrypt/decrypt a buffer and how to send/receive encrypted data.
+
 ## Build from checked out repo
 gsswrap uses standard autoconf/automake.
 From the checked out gsswrap directory:

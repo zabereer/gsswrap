@@ -82,8 +82,11 @@ bool gsswrap_replay_detection(const struct gsswrap_context*);
 /**
  * Encrypt or decrypt a buffer using the established security context.
  * Ownership of the output_buffer remains with gsswrap, do not free it.
+ * Only call this function if both gsswrap_confidentiality_available() and
+ * gsswrap_integrity_available() returns true.
  * Returns true if success, false if not after which none of output_buffer
  * nor output_length is updated.
+ * Use gsswrap_last_context_error() to obtain the failure reason.
  */
 bool gsswrap_encrypt(struct gsswrap_context*,
                      const void* buffer,
@@ -98,7 +101,10 @@ bool gsswrap_decrypt(struct gsswrap_context*,
 
 /**
  * Encrypt and send the buffer using the stored send_func in the context.
+ * Only call this function if both gsswrap_confidentiality_available() and
+ * gsswrap_integrity_available() returns true.
  * Returns true if buffer was successfully encrypted and send_func succeeded.
+ * Use gsswrap_last_context_error() to obtain the failure reason.
  */
 bool gsswrap_encrypt_send(struct gsswrap_context*,
                           const void* buffer,
@@ -110,8 +116,11 @@ bool gsswrap_encrypt_send(struct gsswrap_context*,
  * update output_buffer and output_length. The buffer input buffer obtained
  * via the recv_func will be freed by free_func stored in the context.
  * Ownership of the output_buffer remains with gsswrap, do not free it.
+ * Only call this function if both gsswrap_confidentiality_available() and
+ * gsswrap_integrity_available() returns true.
  * Returns true if a success, false if not after which none of output_buffer
  * nor output_length is updated.
+ * Use gsswrap_last_context_error() to obtain the failure reason.
  */
 bool gsswrap_recv_decrypt(struct gsswrap_context*,
                           void** output_buffer,

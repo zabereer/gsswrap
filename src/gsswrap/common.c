@@ -120,14 +120,15 @@ bool gsswrap_encrypt(struct gsswrap_context* gctx,
     gss_buffer_desc input_buffer = {.length = length,
                                     .value = (void*)buffer};
     reset_wrap_buffer(gctx);
+    int conf_state;
     gctx->status.major = gss_wrap(&gctx->status.minor,
                                   gctx->gss_ctx,
                                   true, // confidentiality and integrity
                                   GSS_C_QOP_DEFAULT,
                                   &input_buffer,
-                                  NULL,
+                                  &conf_state,
                                   &gctx->wrap_buffer);
-    if (GSS_ERROR(gctx->status.major))
+    if (!conf_state || GSS_ERROR(gctx->status.major))
         return false;
     *output_buffer = gctx->wrap_buffer.value;
     *output_length = gctx->wrap_buffer.length;
@@ -143,13 +144,14 @@ bool gsswrap_decrypt(struct gsswrap_context* gctx,
     gss_buffer_desc input_buffer = {.length = length,
                                     .value = (void*)buffer};
     reset_wrap_buffer(gctx);
+    int conf_state;
     gctx->status.major = gss_unwrap(&gctx->status.minor,
                                     gctx->gss_ctx,
                                     &input_buffer,
                                     &gctx->wrap_buffer,
-                                    NULL,
+                                    &conf_state,
                                     NULL);
-    if (GSS_ERROR(gctx->status.major))
+    if (!conf_state || GSS_ERROR(gctx->status.major))
         return false;
     *output_buffer = gctx->wrap_buffer.value;
     *output_length = gctx->wrap_buffer.length;

@@ -293,7 +293,7 @@ func sendAndReceiveSomeData(ctx *C.struct_gsswrap_context, from, to string) {
 		log.Fatal("Failed to receive encrypted payload")
 	}
 
-	val = C.GoString((*C.char)(decryptBuffer))
+	val = C.GoStringN((*C.char)(decryptBuffer), C.int(decryptSize))
 	log.Print("received ", decryptSize, " bytes: ", val)
 	if val != expectedReceived {
 		log.Fatal("Did not receive expected encrypted: ", expectedReceived)

@@ -265,7 +265,7 @@ func sendAndReceiveSomeData(ctx *C.struct_gsswrap_context, from, to string) {
 	fromPayload := []byte("hello from " + from)
 	sendToPeer(C.size_t(len(fromPayload)), unsafe.Pointer(&fromPayload[0]))
 	size, bufptr := recvFromPeer()
-	val := C.GoString((*C.char)(bufptr))
+	val := C.GoStringN((*C.char)(bufptr), C.int(size))
 	C.free(unsafe.Pointer(bufptr))
 	log.Print("received ", size, " bytes: ", val)
 	if val != expectedReceived {
